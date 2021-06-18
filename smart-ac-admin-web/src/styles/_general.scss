@@ -1,0 +1,144 @@
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+html, body {
+    height: 100%;
+    width: 100%;
+}
+  
+@media (min-width: 1300px) {
+    .container {
+      max-width: calc(100% - 100px);
+    }
+}
+
+
+.visibility-hidden {
+    visibility: hidden;
+}
+  
+  .text-left {
+    text-align: left !important;
+  }
+  
+  .text-center {
+    text-align: center !important;
+  }
+  
+  .text-right {
+    text-align: right !important;
+  }
+  
+  .hidden {
+    display: none !important;
+  }
+  
+  
+.info-notification-overlay {
+  background-color: $app-info-color;
+  color: $white;
+}
+
+.success-notification-overlay {
+  background-color: $app-success-color;
+  color: $white;
+}
+
+.warning-notification-overlay {
+  background-color: $app-warn-color;
+  color: $white;
+}
+
+.error-notification-overlay {
+  background-color: $app-error-color;
+  color: $white;
+}
+
+
+.bg-success {
+  background-color: #d4edda !important;
+}
+
+.bg-warning {
+  background-color: #fff3cd !important;
+}
+
+.bg-error {
+  background-color: #f8d7da !important;
+}
+
+.bg-info {
+  background-color: #d9edf7!important;
+}
+
+.alert {
+  padding: 10px 16px;
+  display: block;    
+}
+
+a.link-button:not(:disabled) {
+  color: #007bff;
+  cursor: pointer;
+
+  &:hover {
+      text-decoration: underline;
+  }
+}
+
+.loading-button {
+  &.active {
+    background-color: white !important;
+    cursor: not-allowed !important;
+    color: white !important;
+    box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12) !important;
+
+    .mat-spinner, .mat-progress-spinner {
+      opacity: 1;
+      display: block;
+    }
+  }
+
+  .mat-button-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mat-spinner, .mat-progress-spinner {
+    display: none;
+    opacity: 0;
+    transition: opacity .3s ease-in-out;
+    position: absolute;
+    top: 25%;
+  }
+}
+
+.loading-overlay {
+  position: relative;
+
+  &:before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    pointer-events: auto;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity .4s cubic-bezier(.25,.8,.25,1);
+    opacity: 0.5;
+    background: white;
+    content: ''
+  }
+}
+
+.mat-tooltip {
+  font-size: 12px;
+}
+
+.mat-tab-label {
+  opacity: 1 !important;
+}
+
+.mat-dialog-actions button:first-child {
+  margin-left: auto;
+}

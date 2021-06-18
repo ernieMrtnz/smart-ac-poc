@@ -1,0 +1,19 @@
+{
+    "eslint.validate": [
+        "javascript",
+        "typescript",
+        "html"
+    ],
+    "eslint.options": {
+        "extensions": [
+            ".js",
+            ".ts",
+            "html"
+        ]
+    },
+    "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true,
+    },
+    "files.eol": "\r\n"
+}

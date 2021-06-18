@@ -1,0 +1,39 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-md-7 col-lg-4">
+    <form
+      class="form-full-container"
+      [formGroup]="loginForm"
+      (appSubmit)="onLogin()"
+    >
+      <mat-card>
+        <h4 class="logo-text">Smart AC Admin Panel</h4>
+        <h5 style="margin-bottom: 20px">
+          Enter your login and password to sign in
+        </h5>
+        <mat-form-field>
+          <input matInput placeholder="Login" formControlName="login" />
+          <app-input-error controlName="login"></app-input-error>
+        </mat-form-field>
+        <mat-form-field>
+          <input
+            matInput
+            placeholder="Password"
+            type="password"
+            formControlName="password"
+          />
+          <app-input-error controlName="password"></app-input-error>
+        </mat-form-field>
+
+        <div style="margin-top: 10px">
+          <app-loading-button
+            color="primary"
+            type="submit"
+            [isLoading]="loading$ | async"
+          >
+            Sign In
+          </app-loading-button>
+        </div>
+      </mat-card>
+    </form>
+  </div>
+</div>
