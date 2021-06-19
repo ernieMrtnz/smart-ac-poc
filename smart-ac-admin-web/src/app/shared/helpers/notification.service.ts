@@ -2,6 +2,8 @@ import { Injectable, NgZone } from "@angular/core";
 import { MatSnackBar, MatSnackBarConfig } from "@angular/material/snack-bar";
 import { BehaviorSubject } from "rxjs";
 
+import { ApiException } from "@app/core/data-services";
+
 @Injectable({
   providedIn: "root",
 })
@@ -35,27 +37,27 @@ export class NotificationService {
     });
   }
 
-  //   exception(exception: ApiException): void {
-  //     let errorMessage = "";
+  exception(exception: ApiException): void {
+    let errorMessage = "";
 
-  //     if (exception.response) {
-  //       try {
-  //         let errorResponse = JSON.parse(exception.response) as {
-  //           message: string;
-  //         };
+    if (exception.response) {
+      try {
+        let errorResponse = JSON.parse(exception.response) as {
+          message: string;
+        };
 
-  //         errorMessage = errorResponse?.message;
-  //       } catch (e) {
-  //         console.error(e);
-  //       }
-  //     } else {
-  //       console.error(exception);
-  //     }
+        errorMessage = errorResponse?.message;
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      console.error(exception);
+    }
 
-  //     errorMessage = errorMessage || "Unexpected error. Please try again later";
+    errorMessage = errorMessage || "Unexpected error. Please try again later";
 
-  //     this.error(errorMessage);
-  //   }
+    this.error(errorMessage);
+  }
 
   private show(message: string, configuration: MatSnackBarConfig): void {
     let config = {

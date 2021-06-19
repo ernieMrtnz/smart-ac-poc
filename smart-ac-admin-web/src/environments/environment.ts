@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
 
-  apiUrl: "http://localhost/smartac/admin/",
+  apiUrl: "https://localhost:44306/",
 };
 
 /*

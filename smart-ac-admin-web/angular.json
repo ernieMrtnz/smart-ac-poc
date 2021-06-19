@@ -64,7 +64,7 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "port": 4222,
+            "port": 4322,
             "browserTarget": "smart-ac-admin-web:build"
           },
           "configurations": {

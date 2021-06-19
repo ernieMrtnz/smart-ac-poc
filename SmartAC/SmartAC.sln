@@ -5,11 +5,7 @@ VisualStudioVersion = 16.0.31410.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SmartAC", "SmartAC", "{2028929D-4D11-4AF6-A0E4-C96A9B4D1DB3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartAC.Api", "SmartAC\SmartAC.Api\SmartAC.Api.csproj", "{38E4E382-EE0C-4115-AD11-876B5CDF899F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartAC.BusinessLogic", "SmartAC\SmartAC.BusinessLogic\SmartAC.BusinessLogic.csproj", "{20294B17-1BD8-43D9-9963-9B2C075FD226}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartAC.DataAccess", "SmartAC\SmartAC.DataAccess\SmartAC.DataAccess.csproj", "{69332641-38D7-4483-B208-413B67E92CD9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartAC.Api", "SmartAC\SmartAC.Api\SmartAC.Api.csproj", "{38E4E382-EE0C-4115-AD11-876B5CDF899F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,22 +17,12 @@ Global
 		{38E4E382-EE0C-4115-AD11-876B5CDF899F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38E4E382-EE0C-4115-AD11-876B5CDF899F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38E4E382-EE0C-4115-AD11-876B5CDF899F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{20294B17-1BD8-43D9-9963-9B2C075FD226}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{20294B17-1BD8-43D9-9963-9B2C075FD226}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{20294B17-1BD8-43D9-9963-9B2C075FD226}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{20294B17-1BD8-43D9-9963-9B2C075FD226}.Release|Any CPU.Build.0 = Release|Any CPU
-		{69332641-38D7-4483-B208-413B67E92CD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{69332641-38D7-4483-B208-413B67E92CD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{69332641-38D7-4483-B208-413B67E92CD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{69332641-38D7-4483-B208-413B67E92CD9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{38E4E382-EE0C-4115-AD11-876B5CDF899F} = {2028929D-4D11-4AF6-A0E4-C96A9B4D1DB3}
-		{20294B17-1BD8-43D9-9963-9B2C075FD226} = {2028929D-4D11-4AF6-A0E4-C96A9B4D1DB3}
-		{69332641-38D7-4483-B208-413B67E92CD9} = {2028929D-4D11-4AF6-A0E4-C96A9B4D1DB3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D32F7B98-4DAF-4D0D-81E6-66E442F78F48}

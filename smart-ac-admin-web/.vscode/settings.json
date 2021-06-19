@@ -15,5 +15,11 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true,
     },
-    "files.eol": "\r\n"
+    "files.eol": "\r\n",
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/0574f785-e96c-43e3-8df5-9a8c451a6fc2/resourceGroups/SmartAC-POC/providers/Microsoft.Web/sites/smartac-admin-web",
+    "appService.deploySubpath": "dist"
 }
