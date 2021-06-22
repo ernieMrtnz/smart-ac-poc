@@ -1,0 +1,116 @@
+@import "~variables.scss";
+
+.site-wrapper {
+  height: 100%;
+  width: 100%;
+}
+
+mat-sidenav-container {
+  height: 100%;
+  width: 100%;
+
+  .toolbar {
+    position: fixed;
+    width: 100%;
+    display: flex;
+    z-index: 1000;
+
+    .branding {
+      cursor: pointer;
+      overflow: hidden;
+      padding-top: 4px;
+      text-overflow: ellipsis;   
+    }
+
+    .toolbar-right-button {
+      flex: 1 1 auto;
+      text-align: right;
+    }
+  }
+
+  .content {
+    margin: 84px 0;
+    padding: 25px 0;
+
+    &.content-full {
+      margin-top: 64px;
+      margin-bottom: 0;
+
+      .container {
+        max-width: 100%;
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+  }
+
+  @include media-breakpoint-down(xl) {
+    .toolbar .branding{
+      margin-right: 50px;
+    }
+  }
+
+  @include media-breakpoint-down(lg) {
+    .toolbar .branding{
+      margin-right: 20px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .toolbar {
+      .toolbar-nav-button {
+        display: none;
+      }
+
+      .mat-toolbar-single-row {
+        padding: 0;
+      }
+
+      .branding {
+        flex: 1 1 auto;
+        padding-top: 0;
+        margin: 0;
+        text-align: center;
+      }
+
+      .toolbar-right-button {
+        flex: unset;
+
+        button span {
+          display: none;
+        }
+      }
+    }
+
+    .content {
+      margin: 70px 0;
+
+      &.content-full {
+        margin-top: 56px;
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+mat-sidenav {
+  width: 250px;
+
+  .branding {
+    height: 56px;
+    padding: 12px 10px 8px;
+    font-size: 20px;
+    font-weight: 500;
+    background-color: $app-mat-primary-color;
+    text-align: center;
+
+    span {
+      position: relative;
+      top: 3px;
+    }
+  }
+
+  .mat-nav-list {
+    padding-top: 0;
+  }
+}

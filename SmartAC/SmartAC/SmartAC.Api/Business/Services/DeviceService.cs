@@ -1,39 +1,57 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.Extensions.Options;
 using SmartAC.Api.Business.Models;
+using SmartAC.Api.Common.Enums;
+using SmartAC.Api.Common.Models;
 using SmartAC.Api.DataAccess.Entities;
 using SmartAC.Api.DataAccess.Repository.Interfaces;
+using SmartAC.Api.Helpers;
 
 namespace SmartAC.Api.Business.Services
 {
-    public class DeviceService
+    public class DeviceService : BaseService
     {
         private readonly IDeviceRepository _deviceRepository;
-        private readonly IMapper _mapper;
+        private readonly IDeviceDetailRepository _deviceDetailRepository;
 
         public DeviceService(
             IMapper mapper,
-            IDeviceRepository deviceRepository)
+            IOptions<AppSettings> appSettings,
+            IDeviceRepository deviceRepository,
+            IDeviceDetailRepository deviceDetailRepository)
+            : base(mapper, appSettings)
         {
-            _mapper = mapper;
             _deviceRepository = deviceRepository;
+            _deviceDetailRepository = deviceDetailRepository;
         }
 
-        public async Task<List<DeviceModel>> GetAll()
+        public async Task<PageResult<DeviceResponseModel>> FindByParams(
+            DeviceSearchRequest request)
         {
-            var result = await _deviceRepository.GetAll();
-            return _mapper.Map<List<DeviceModel>>(result);
+            Expression<Func<Device, bool>> filter = x =>
+                (string.IsNullOrEmpty(request.SerialNumber)
+                 || x.SerialNumber == request.SerialNumber);
+
+            Expression<Func<Device, object>> sortBySelector = request.SortBy?.ToLower() switch
+            {
+                // "serialNumber" => c => c.SerialNumber,
+                _ => c => c.ID,
+            };
+
+            var result = await _deviceRepository.FindPageResultAsync(
+                filter,
+                sortBySelector,
+                request.OrderBy,
+                request.Page,
+                request.PageSize);
+
+            return _mapper.Map<PageResult<DeviceResponseModel>>(result);
         }
 
-        public async Task<DeviceModel> FindBySerialNumber(string serialNumber)
-        {
-            var result = await _deviceRepository.FirstOrDefaultAsync(x => x.SerialNumber == serialNumber);
-            return _mapper.Map<DeviceModel>(result);
-        }
-
-        public async Task<DeviceModel> Add(NewDeviceRequest request)
+        public async Task<DeviceResponseModel> Add(NewDeviceRequest request)
         {
             var device = new Device()
             {
@@ -45,7 +63,32 @@ namespace SmartAC.Api.Business.Services
 
             var result = await _deviceRepository.Add(device);
 
-            return _mapper.Map<DeviceModel>(result);
+            return _mapper.Map<DeviceResponseModel>(result);
+        }
+
+        public async Task<PageResult<DeviceDetailResponseModel>> GetDeviceDetailsByDeviceId(
+            long deviceId, 
+            OrderByEnum orderBy,
+            string sortBy,
+            int page,
+            int pageSize)
+        {
+            Expression<Func<DeviceDetail, bool>> filter = x => x.DeviceID == deviceId;
+
+            Expression<Func<DeviceDetail, object>> sortBySelector = sortBy?.ToLower() switch
+            {
+                "createdatetime" => c => c.CreatedDateTime,
+                _ => c => c.ID,
+            };
+
+            var result = await _deviceDetailRepository.FindPageResultAsync(
+                filter,
+                sortBySelector,
+                orderBy,
+                page,
+                pageSize);
+
+            return _mapper.Map<PageResult<DeviceDetailResponseModel>>(result);
         }
     }
 }

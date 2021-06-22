@@ -1,0 +1,19 @@
+@import '~variables.scss';
+
+@include media-breakpoint-up(md) {
+  .mat-card {
+    height: 100%;
+  }
+}
+
+@include media-breakpoint-down(md) {
+  .mat-card {
+    margin-bottom: 15px;
+  }
+}
+
+.user-details {
+    font-size: 18px;
+    line-height: 28px;
+    padding: 15px 0;
+}

@@ -1,0 +1,39 @@
+<app-page-header>Device Alert Details</app-page-header>
+
+<app-page-previous></app-page-previous>
+
+<div class="device-details-to-resolve">
+  <mat-card>
+    <div class="container">
+      <div class="device-detail">
+        <b>Serial Number: </b> {{ deviceDetails?.serialNumber || "" }}
+      </div>
+
+      <div class="device-detail">
+        <b>Air Humidity Percent: </b>
+        {{ deviceDetails?.airHumidityPercent || "" }}
+      </div>
+
+      <div class="device-detail">
+        <b>Carbon Monoxide Level: </b>
+        {{ deviceDetails?.carbonMonoxideLevel || "" }}%
+      </div>
+
+      <div class="device-detail">
+        <b>Temperature (C&deg;): </b>
+        {{ deviceDetails ? deviceDetails.temperature : "" }}
+      </div>
+
+      <div class="device-detail-resolve">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="resolve()"
+          [disabled]="resolved"
+        >
+          Resolve Device Issue
+        </button>
+      </div>
+    </div>
+  </mat-card>
+</div>

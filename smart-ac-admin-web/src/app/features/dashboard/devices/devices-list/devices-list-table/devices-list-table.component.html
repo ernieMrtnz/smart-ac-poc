@@ -1,0 +1,56 @@
+<mat-table [dataSource]="list" [trackBy]="trackByID">
+  <ng-container matColumnDef="id">
+    <mat-header-cell *matHeaderCellDef> ID </mat-header-cell>
+    <mat-cell *matCellDef="let row" mobile-label="ID">
+      <div>
+        <div>{{ row.id }}</div>
+      </div>
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="serialNumber">
+    <mat-header-cell *matHeaderCellDef> Serial Number </mat-header-cell>
+    <mat-cell *matCellDef="let row" mobile-label="Serial Number">
+      <div>
+        <div>{{ row.serialNumber }}</div>
+      </div>
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="firmwareVersion">
+    <mat-header-cell *matHeaderCellDef> Firmware version </mat-header-cell>
+    <mat-cell *matCellDef="let row" mobile-label="Firmware Version">
+      {{ row.firmwareVersion }}
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="statusId">
+    <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+    <mat-cell *matCellDef="let row" mobile-label="Status">
+      {{
+        row.statusID === 1
+          ? "Active"
+          : row.statusID === 2
+          ? "Locked"
+          : "Deleted"
+      }}
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="selectDevice">
+    <mat-header-cell *matHeaderCellDef></mat-header-cell>
+    <mat-cell *matCellDef="let row" mobile-label="">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="selectDevice.emit(row)"
+      >
+        Device Details
+      </button>
+    </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns; let i = index">
+  </mat-row>
+</mat-table>

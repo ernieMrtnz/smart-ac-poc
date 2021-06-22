@@ -1,8 +1,11 @@
-@import "./styles/variables";
+@import "variables";
 
 @import '../node_modules/bootstrap/scss/bootstrap-reboot';
 @import '../node_modules/bootstrap/scss/bootstrap-grid';
 
 @import "~@angular/material/prebuilt-themes/deeppurple-amber.css";
 
-@import "./styles//general";
+@import "./styles/general";
+@import "./styles/buttons";
+@import "./styles/form";
+@import "./styles/chart";

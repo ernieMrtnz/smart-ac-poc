@@ -1,0 +1,43 @@
+<mat-card class="table-filters form-full-container">
+  <form [formGroup]="searchParams" (appSubmit)="search.emit()">
+    <div class="row">
+      <div class="col-lg-3">
+        <mat-form-field>
+          <mat-label>Search Device By</mat-label>
+          <mat-select formControlName="option">
+            <mat-option *ngFor="let opt of options" [value]="opt">
+              {{ opt }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="col-lg-7" [ngSwitch]="true">
+        <div
+          *ngSwitchCase="optionEnum.All === searchParams.value.option"
+          class="row"
+        ></div>
+
+        <div
+          *ngSwitchCase="optionEnum.SerialNumber === searchParams.value.option"
+        >
+          <mat-form-field class="col-lg-6">
+            <mat-label>Serial Number</mat-label>
+            <input matInput type="text" formControlName="serialNumber" />
+            <app-input-error controlName="serialNumber"></app-input-error>
+            <app-input-clear-icon
+              matSuffix
+              controlName="serialNumber"
+            ></app-input-clear-icon>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="col-lg-2 form-button-down text-right">
+        <app-loading-button color="primary" type="submit" [isLoading]="loading">
+          Search
+        </app-loading-button>
+      </div>
+    </div>
+  </form>
+</mat-card>

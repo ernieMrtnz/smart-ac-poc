@@ -27,6 +27,9 @@ export class AuthenticationClient {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "https://localhost:44306";
     }
 
+    /**
+     * Logs in a user to authenticate
+     */
     login(credentials: AuthCredentialModel): Observable<AuthLoginResponseModel> {
         let url_ = this.baseUrl + "/api/auth/login";
         url_ = url_.replace(/[?&]$/, "");
@@ -78,6 +81,59 @@ export class AuthenticationClient {
         return _observableOf<AuthLoginResponseModel>(<any>null);
     }
 
+    /**
+     * Checks if user is still valid (token)
+     */
+    identity(): Observable<UserIdentityModel> {
+        let url_ = this.baseUrl + "/api/auth/identity";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processIdentity(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processIdentity(<any>response_);
+                } catch (e) {
+                    return <Observable<UserIdentityModel>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<UserIdentityModel>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processIdentity(response: HttpResponseBase): Observable<UserIdentityModel> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <UserIdentityModel>JSON.parse(_responseText, this.jsonParseReviver);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<UserIdentityModel>(<any>null);
+    }
+
+    /**
+     * Authenticates a device
+     */
     token(serialNumber: string | null): Observable<AuthDeviceResponseModel> {
         let url_ = this.baseUrl + "/api/auth/device/{serialNumber}/token";
         if (serialNumber === undefined || serialNumber === null)
@@ -127,6 +183,60 @@ export class AuthenticationClient {
         }
         return _observableOf<AuthDeviceResponseModel>(<any>null);
     }
+
+    /**
+     * Adds a user to the system
+     */
+    employee(request: NewUserRequest): Observable<boolean> {
+        let url_ = this.baseUrl + "/api/auth/employee";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processEmployee(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processEmployee(<any>response_);
+                } catch (e) {
+                    return <Observable<boolean>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<boolean>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processEmployee(response: HttpResponseBase): Observable<boolean> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <boolean>JSON.parse(_responseText, this.jsonParseReviver);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<boolean>(<any>null);
+    }
 }
 
 @Injectable({
@@ -142,7 +252,10 @@ export class DeviceClient {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "https://localhost:44306";
     }
 
-    devicePost(request: NewDeviceRequest): Observable<DeviceModel> {
+    /**
+     * Adds a new device
+     */
+    device(request: NewDeviceRequest): Observable<DeviceResponseModel> {
         let url_ = this.baseUrl + "/api/device";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -159,20 +272,20 @@ export class DeviceClient {
         };
 
         return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processDevicePost(response_);
+            return this.processDevice(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processDevicePost(<any>response_);
+                    return this.processDevice(<any>response_);
                 } catch (e) {
-                    return <Observable<DeviceModel>><any>_observableThrow(e);
+                    return <Observable<DeviceResponseModel>><any>_observableThrow(e);
                 }
             } else
-                return <Observable<DeviceModel>><any>_observableThrow(response_);
+                return <Observable<DeviceResponseModel>><any>_observableThrow(response_);
         }));
     }
 
-    protected processDevicePost(response: HttpResponseBase): Observable<DeviceModel> {
+    protected processDevice(response: HttpResponseBase): Observable<DeviceResponseModel> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -182,7 +295,7 @@ export class DeviceClient {
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result200: any = null;
-            result200 = _responseText === "" ? null : <DeviceModel>JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = _responseText === "" ? null : <DeviceResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
             return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
@@ -190,11 +303,35 @@ export class DeviceClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<DeviceModel>(<any>null);
+        return _observableOf<DeviceResponseModel>(<any>null);
     }
 
-    all(): Observable<DeviceModel[]> {
-        let url_ = this.baseUrl + "/api/device/all";
+    /**
+     * Finds devices by params
+     * @param serialNumber (optional) 
+     * @param sortBy (optional) 
+     * @param orderBy (optional) 
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     */
+    devices(serialNumber?: string | null | undefined, sortBy?: string | null | undefined, orderBy?: OrderByEnum | undefined, page?: number | undefined, pageSize?: number | undefined): Observable<PageResultOfDeviceResponseModel> {
+        let url_ = this.baseUrl + "/api/devices?";
+        if (serialNumber !== undefined && serialNumber !== null)
+            url_ += "SerialNumber=" + encodeURIComponent("" + serialNumber) + "&";
+        if (sortBy !== undefined && sortBy !== null)
+            url_ += "SortBy=" + encodeURIComponent("" + sortBy) + "&";
+        if (orderBy === null)
+            throw new Error("The parameter 'orderBy' cannot be null.");
+        else if (orderBy !== undefined)
+            url_ += "OrderBy=" + encodeURIComponent("" + orderBy) + "&";
+        if (page === null)
+            throw new Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -206,20 +343,20 @@ export class DeviceClient {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processAll(response_);
+            return this.processDevices(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processAll(<any>response_);
+                    return this.processDevices(<any>response_);
                 } catch (e) {
-                    return <Observable<DeviceModel[]>><any>_observableThrow(e);
+                    return <Observable<PageResultOfDeviceResponseModel>><any>_observableThrow(e);
                 }
             } else
-                return <Observable<DeviceModel[]>><any>_observableThrow(response_);
+                return <Observable<PageResultOfDeviceResponseModel>><any>_observableThrow(response_);
         }));
     }
 
-    protected processAll(response: HttpResponseBase): Observable<DeviceModel[]> {
+    protected processDevices(response: HttpResponseBase): Observable<PageResultOfDeviceResponseModel> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -229,7 +366,7 @@ export class DeviceClient {
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result200: any = null;
-            result200 = _responseText === "" ? null : <DeviceModel[]>JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = _responseText === "" ? null : <PageResultOfDeviceResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
             return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
@@ -237,57 +374,7 @@ export class DeviceClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<DeviceModel[]>(<any>null);
-    }
-
-    deviceGet(serialNumber: string | null): Observable<DeviceModel> {
-        let url_ = this.baseUrl + "/api/device/{serialNumber}";
-        if (serialNumber === undefined || serialNumber === null)
-            throw new Error("The parameter 'serialNumber' must be defined.");
-        url_ = url_.replace("{serialNumber}", encodeURIComponent("" + serialNumber));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_ : any = {
-            observe: "response",
-            responseType: "blob",
-            headers: new HttpHeaders({
-                "Accept": "application/json"
-            })
-        };
-
-        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processDeviceGet(response_);
-        })).pipe(_observableCatch((response_: any) => {
-            if (response_ instanceof HttpResponseBase) {
-                try {
-                    return this.processDeviceGet(<any>response_);
-                } catch (e) {
-                    return <Observable<DeviceModel>><any>_observableThrow(e);
-                }
-            } else
-                return <Observable<DeviceModel>><any>_observableThrow(response_);
-        }));
-    }
-
-    protected processDeviceGet(response: HttpResponseBase): Observable<DeviceModel> {
-        const status = response.status;
-        const responseBlob =
-            response instanceof HttpResponse ? response.body :
-            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
-
-        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
-            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            let result200: any = null;
-            result200 = _responseText === "" ? null : <DeviceModel>JSON.parse(_responseText, this.jsonParseReviver);
-            return _observableOf(result200);
-            }));
-        } else if (status !== 200 && status !== 204) {
-            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            }));
-        }
-        return _observableOf<DeviceModel>(<any>null);
+        return _observableOf<PageResultOfDeviceResponseModel>(<any>null);
     }
 }
 
@@ -304,28 +391,30 @@ export class DeviceDetailClient {
         this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "https://localhost:44306";
     }
 
-    add(request: DeviceDetailRequest): Observable<DeviceDetailResponseModel> {
-        let url_ = this.baseUrl + "/api/DeviceDetail/deviceDetails/add";
+    /**
+     * Retrieves a device detail, (coming from alerts)
+     */
+    deviceDetail(id: number): Observable<DeviceDetailResponseModel> {
+        let url_ = this.baseUrl + "/api/deviceDetail/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(request);
-
         let options_ : any = {
-            body: content_,
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
-                "Content-Type": "application/json",
                 "Accept": "application/json"
             })
         };
 
-        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processAdd(response_);
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDeviceDetail(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processAdd(<any>response_);
+                    return this.processDeviceDetail(<any>response_);
                 } catch (e) {
                     return <Observable<DeviceDetailResponseModel>><any>_observableThrow(e);
                 }
@@ -334,7 +423,7 @@ export class DeviceDetailClient {
         }));
     }
 
-    protected processAdd(response: HttpResponseBase): Observable<DeviceDetailResponseModel> {
+    protected processDeviceDetail(response: HttpResponseBase): Observable<DeviceDetailResponseModel> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -354,6 +443,535 @@ export class DeviceDetailClient {
         }
         return _observableOf<DeviceDetailResponseModel>(<any>null);
     }
+
+    /**
+     * Adds a new device details info
+     */
+    deviceDetails(request: DeviceDetailRequest): Observable<DeviceDetailResponseModel> {
+        let url_ = this.baseUrl + "/api/deviceDetails";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDeviceDetails(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDeviceDetails(<any>response_);
+                } catch (e) {
+                    return <Observable<DeviceDetailResponseModel>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<DeviceDetailResponseModel>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processDeviceDetails(response: HttpResponseBase): Observable<DeviceDetailResponseModel> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <DeviceDetailResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<DeviceDetailResponseModel>(<any>null);
+    }
+
+    /**
+     * Adds device details in bulk for a device
+     */
+    bulk(request: BulkDeviceDetailRequest): Observable<boolean> {
+        let url_ = this.baseUrl + "/api/deviceDetails/bulk";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processBulk(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processBulk(<any>response_);
+                } catch (e) {
+                    return <Observable<boolean>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<boolean>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processBulk(response: HttpResponseBase): Observable<boolean> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <boolean>JSON.parse(_responseText, this.jsonParseReviver);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<boolean>(<any>null);
+    }
+
+    /**
+     * Retrieves device details for chart display
+     * @param isToday (optional) 
+     * @param isWeek (optional) 
+     * @param isMonth (optional) 
+     * @param isYear (optional) 
+     */
+    forChart(deviceId: number, isToday?: boolean | undefined, isWeek?: boolean | undefined, isMonth?: boolean | undefined, isYear?: boolean | undefined): Observable<DeviceDetailsForChartResponse> {
+        let url_ = this.baseUrl + "/api/deviceDetail/{deviceId}/forChart?";
+        if (deviceId === undefined || deviceId === null)
+            throw new Error("The parameter 'deviceId' must be defined.");
+        url_ = url_.replace("{deviceId}", encodeURIComponent("" + deviceId));
+        if (isToday === null)
+            throw new Error("The parameter 'isToday' cannot be null.");
+        else if (isToday !== undefined)
+            url_ += "IsToday=" + encodeURIComponent("" + isToday) + "&";
+        if (isWeek === null)
+            throw new Error("The parameter 'isWeek' cannot be null.");
+        else if (isWeek !== undefined)
+            url_ += "IsWeek=" + encodeURIComponent("" + isWeek) + "&";
+        if (isMonth === null)
+            throw new Error("The parameter 'isMonth' cannot be null.");
+        else if (isMonth !== undefined)
+            url_ += "IsMonth=" + encodeURIComponent("" + isMonth) + "&";
+        if (isYear === null)
+            throw new Error("The parameter 'isYear' cannot be null.");
+        else if (isYear !== undefined)
+            url_ += "IsYear=" + encodeURIComponent("" + isYear) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processForChart(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processForChart(<any>response_);
+                } catch (e) {
+                    return <Observable<DeviceDetailsForChartResponse>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<DeviceDetailsForChartResponse>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processForChart(response: HttpResponseBase): Observable<DeviceDetailsForChartResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <DeviceDetailsForChartResponse>JSON.parse(_responseText, this.jsonParseReviver);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<DeviceDetailsForChartResponse>(<any>null);
+    }
+
+    /**
+     * Updates the resolution for a device detail that was alerted
+     */
+    resolve(id: number): Observable<boolean> {
+        let url_ = this.baseUrl + "/api/deviceDetail/{id}/resolve";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processResolve(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processResolve(<any>response_);
+                } catch (e) {
+                    return <Observable<boolean>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<boolean>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processResolve(response: HttpResponseBase): Observable<boolean> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <boolean>JSON.parse(_responseText, this.jsonParseReviver);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<boolean>(<any>null);
+    }
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class EmployeeClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "https://localhost:44306";
+    }
+
+    /**
+     * Get all employees
+     * @param sortBy (optional) 
+     * @param orderBy (optional) 
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @return PagedResult employees
+     */
+    forPaged(sortBy?: string | null | undefined, orderBy?: OrderByEnum | undefined, page?: number | undefined, pageSize?: number | undefined): Observable<PageResultOfEmployeeResponseModel> {
+        let url_ = this.baseUrl + "/api/employee/forPaged?";
+        if (sortBy !== undefined && sortBy !== null)
+            url_ += "SortBy=" + encodeURIComponent("" + sortBy) + "&";
+        if (orderBy === null)
+            throw new Error("The parameter 'orderBy' cannot be null.");
+        else if (orderBy !== undefined)
+            url_ += "OrderBy=" + encodeURIComponent("" + orderBy) + "&";
+        if (page === null)
+            throw new Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processForPaged(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processForPaged(<any>response_);
+                } catch (e) {
+                    return <Observable<PageResultOfEmployeeResponseModel>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<PageResultOfEmployeeResponseModel>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processForPaged(response: HttpResponseBase): Observable<PageResultOfEmployeeResponseModel> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <PageResultOfEmployeeResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<PageResultOfEmployeeResponseModel>(<any>null);
+    }
+
+    /**
+     * Retrieves a user by an id
+     */
+    employee(id: number): Observable<EmployeeResponseModel> {
+        let url_ = this.baseUrl + "/api/employee/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processEmployee(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processEmployee(<any>response_);
+                } catch (e) {
+                    return <Observable<EmployeeResponseModel>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<EmployeeResponseModel>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processEmployee(response: HttpResponseBase): Observable<EmployeeResponseModel> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <EmployeeResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<EmployeeResponseModel>(<any>null);
+    }
+
+    /**
+     * Checks if an user's account is active
+     */
+    isEnabled(id: number): Observable<boolean> {
+        let url_ = this.baseUrl + "/api/employee/{id}/isEnabled";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processIsEnabled(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processIsEnabled(<any>response_);
+                } catch (e) {
+                    return <Observable<boolean>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<boolean>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processIsEnabled(response: HttpResponseBase): Observable<boolean> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <boolean>JSON.parse(_responseText, this.jsonParseReviver);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<boolean>(<any>null);
+    }
+
+    /**
+     * Enables an user's account
+     */
+    enable(id: number): Observable<EmployeeResponseModel> {
+        let url_ = this.baseUrl + "/api/employee/{id}/enable";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processEnable(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processEnable(<any>response_);
+                } catch (e) {
+                    return <Observable<EmployeeResponseModel>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<EmployeeResponseModel>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processEnable(response: HttpResponseBase): Observable<EmployeeResponseModel> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <EmployeeResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<EmployeeResponseModel>(<any>null);
+    }
+
+    /**
+     * Disables a user's account
+     */
+    disable(id: number): Observable<EmployeeResponseModel> {
+        let url_ = this.baseUrl + "/api/employee/{id}/disable";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDisable(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDisable(<any>response_);
+                } catch (e) {
+                    return <Observable<EmployeeResponseModel>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<EmployeeResponseModel>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processDisable(response: HttpResponseBase): Observable<EmployeeResponseModel> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : <EmployeeResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<EmployeeResponseModel>(<any>null);
+    }
 }
 
 export interface AuthLoginResponseModel {
@@ -362,7 +980,6 @@ export interface AuthLoginResponseModel {
     isAdmin: boolean;
     name?: string | undefined;
     token?: string | undefined;
-    attemptsleft: number;
     isLocked: boolean;
     errorMessage?: string | undefined;
 }
@@ -372,31 +989,34 @@ export interface AuthCredentialModel {
     password: string;
 }
 
+export interface UserIdentityModel {
+    id: number;
+    userTypeID: number;
+    name?: string | undefined;
+    expirationTime: Date;
+    deviceID?: number | undefined;
+}
+
 export interface AuthDeviceResponseModel {
     isSuccess: boolean;
     token?: string | undefined;
 }
 
-export interface DeviceModel {
+export interface NewUserRequest {
+    email?: string | undefined;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    login?: string | undefined;
+    password?: string | undefined;
+    isAdmin: boolean;
+}
+
+export interface DeviceResponseModel {
     id: number;
     serialNumber?: string | undefined;
     registrationDate: Date;
     firmwareVersion?: string | undefined;
     statusID: number;
-    temperature?: string | undefined;
-    airHumidity: number;
-    carbonMonoxideLevel: number;
-    healthStatus?: string | undefined;
-    deviceDetails?: DeviceDetailResponseModel[] | undefined;
-}
-
-export interface DeviceDetailResponseModel {
-    id: number;
-    temperature: number;
-    airHumidityPercent: number;
-    carbonMonoxideLevel: number;
-    healthStatus?: string | undefined;
-    deviceID: number;
 }
 
 export interface NewDeviceRequest {
@@ -405,12 +1025,59 @@ export interface NewDeviceRequest {
     firmwareVersion?: string | undefined;
 }
 
+export interface PageResultOfDeviceResponseModel {
+    page?: DeviceResponseModel[] | undefined;
+    totalCount: number;
+}
+
+export type OrderByEnum = "Asc" | "Desc";
+
+export interface DeviceDetailResponseModel {
+    id: number;
+    temperature: number;
+    airHumidityPercent: number;
+    carbonMonoxideLevel: number;
+    healthStatus?: string | undefined;
+    deviceID: number;
+    createdDateTime: Date;
+    serialNumber?: string | undefined;
+}
+
 export interface DeviceDetailRequest {
     temperature: number;
     airHumidityPercent: number;
     carbonMonoxideLevel: number;
     healthStatus?: string | undefined;
     deviceID: number;
+}
+
+export interface BulkDeviceDetailRequest {
+    bulkDeviceDetails?: DeviceDetailRequest[] | undefined;
+}
+
+export interface DeviceDetailsForChartResponse {
+    temperatureLow: number;
+    temperatureHigh: number;
+    airHumidityLow: number;
+    airHumidityHigh: number;
+    carbonMonoxideLow: number;
+    carbonMonoxideHigh: number;
+    serialNumber?: string | undefined;
+}
+
+export interface PageResultOfEmployeeResponseModel {
+    page?: EmployeeResponseModel[] | undefined;
+    totalCount: number;
+}
+
+export interface EmployeeResponseModel {
+    id: number;
+    userID: number;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
+    email?: string | undefined;
+    statusID: number;
+    isAdmin: boolean;
 }
 
 export class ApiException extends Error {

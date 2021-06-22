@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SmartAC.Api.Common.Enums;
+using SmartAC.Api.Common.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -22,5 +24,15 @@ namespace SmartAC.Api.DataAccess.Repository.Interfaces
         Task<T> Update(T entity);
 
         Task<T> Delete(long id);
+
+        Task BulkInsert(List<T> items);
+
+        Task<PageResult<T>> FindPageResultAsync(
+            Expression<Func<T, bool>> filter,
+            Expression<Func<T, object>> orderBySelector,
+            OrderByEnum orderByEnum,
+            int? page,
+            int? pageSize,
+            Func<IQueryable<T>, IQueryable<T>> includes = null);
     }
 }

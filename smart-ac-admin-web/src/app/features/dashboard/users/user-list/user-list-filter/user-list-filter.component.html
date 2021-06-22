@@ -1,0 +1,11 @@
+<mat-card class="table-filters form-full-container">
+  <form [formGroup]="searchParams" (appSubmit)="search.emit()">
+    <div class="row">
+      <div class="col-lg-6 form-button-down text-right">
+        <app-loading-button color="primary" type="submit" [isLoading]="loading">
+          Retrieve all employees
+        </app-loading-button>
+      </div>
+    </div>
+  </form>
+</mat-card>

@@ -27,7 +27,7 @@ namespace SmartAC.Api.DataAccess.Persistence
         {
             base.OnConfiguring(optionsBuilder);
 
-            optionsBuilder.UseLazyLoadingProxies();
+            optionsBuilder.UseLazyLoadingProxies(false);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -80,11 +80,6 @@ namespace SmartAC.Api.DataAccess.Persistence
                 entity.Property(e => e.AirHumidityPercent).HasColumnType("decimal(18, 2)");
 
                 entity.Property(e => e.DeviceID).HasColumnName("DeviceID");
-
-                entity.HasOne(d => d.Device)
-                    .WithMany(p => p.DeviceDetails)
-                    .HasForeignKey(d => d.DeviceID)
-                    .HasConstraintName("FK_dbo.DeviceDetail_DeviceID");
             });
         }
 

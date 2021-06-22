@@ -1,4 +1,4 @@
-﻿using SmartAC.Api.DataAccess.Entities;
+﻿using System;
 
 namespace SmartAC.Api.Business.Models
 {
@@ -15,5 +15,9 @@ namespace SmartAC.Api.Business.Models
         public string HealthStatus { get; set; }
 
         public long DeviceID { get; set; }
+
+        public DateTime CreatedDateTime { get; set; }
+
+        public string SerialNumber { get; set; }
     }
 }

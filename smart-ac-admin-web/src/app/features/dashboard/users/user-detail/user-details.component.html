@@ -1,0 +1,46 @@
+<app-page-header>Employee Details</app-page-header>
+
+<app-page-previous></app-page-previous>
+
+<app-loading-bar [isLoading]="query.dataLoading$ | async"></app-loading-bar>
+
+<div *ngIf="query.userDetails$ | async as details">
+  <div class="col-12">
+    <mat-card>
+      <div class="container">
+        <div class="user-details">
+          <div class="name">
+            <b>Name:</b> {{ details.firstName }} {{ details.lastName }}
+          </div>
+          <div class="email"><b>Email:</b> {{ details.email }}</div>
+          <div class="admin">
+            <b>Is Admin:</b> {{ details.isAdmin ? "Admin" : "Non-admin" }}
+          </div>
+          <div class="status">
+            <b>Status:</b> {{ details.statusID === 1 ? "Active" : "Locked" }}
+          </div>
+        </div>
+
+        <div class="enableBtn">
+          <button
+            [ngShow]="details.statusID === 1"
+            mat-raised-button
+            color="accent"
+            (click)="disableUser()"
+          >
+            Disable
+          </button>
+
+          <button
+            [ngShow]="details.statusID === 2"
+            mat-raised-button
+            color="primary"
+            (click)="enableUser()"
+          >
+            Enable
+          </button>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+</div>

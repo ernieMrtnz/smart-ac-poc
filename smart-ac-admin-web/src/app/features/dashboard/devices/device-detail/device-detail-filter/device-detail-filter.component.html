@@ -1,0 +1,31 @@
+<mat-card class="table-filters form-full-container">
+  <form [formGroup]="searchParams" (appSubmit)="search.emit()">
+    <div class="row">
+      <div class="col-lg-10">
+        <div class="row">
+          <div class="col-lg-3">
+            <mat-form-field>
+              <mat-label>Search Reservation By</mat-label>
+              <mat-select formControlName="option">
+                <mat-option *ngFor="let opt of options" [value]="opt">
+                  {{ opt }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-2 form-button-down text-right">
+        <app-loading-button
+          color="primary"
+          type="submit"
+          [isLoading]="loading"
+          *ngIf="searchParams.value.option"
+        >
+          Search
+        </app-loading-button>
+      </div>
+    </div>
+  </form>
+</mat-card>

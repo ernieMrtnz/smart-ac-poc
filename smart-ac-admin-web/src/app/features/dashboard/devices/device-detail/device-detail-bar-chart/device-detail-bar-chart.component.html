@@ -1,0 +1,32 @@
+<div class="device-details-chart">
+  <mat-card>
+    <div class="row">
+      <div class="col-4">
+        <app-chart
+          [barChartData]="temperatureChartData"
+          [barChartLabels]="temperatureChartLabels"
+          [barChartOptions]="temperatureChartOptions"
+          [barChartType]="barChartType"
+        ></app-chart>
+      </div>
+
+      <div class="col-4">
+        <app-chart
+          [barChartData]="airHumidityChartData"
+          [barChartLabels]="airHumidityChartLabels"
+          [barChartOptions]="airHumidityChartOptions"
+          [barChartType]="barChartType"
+        ></app-chart>
+      </div>
+
+      <div class="col-4">
+        <app-chart
+          [barChartData]="carbonMonChartData"
+          [barChartLabels]="carbonMonChartLabels"
+          [barChartOptions]="carbonMonChartOptions"
+          [barChartType]="barChartType"
+        ></app-chart>
+      </div>
+    </div>
+  </mat-card>
+</div>

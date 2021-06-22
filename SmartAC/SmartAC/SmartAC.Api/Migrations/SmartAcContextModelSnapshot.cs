@@ -71,6 +71,9 @@ namespace SmartAC.Api.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<DateTime?>("ResolvedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<decimal>("Temperature")
                         .HasColumnType("decimal(18,2)");
 
@@ -210,9 +213,8 @@ namespace SmartAC.Api.Migrations
             modelBuilder.Entity("SmartAC.Api.DataAccess.Entities.DeviceDetail", b =>
                 {
                     b.HasOne("SmartAC.Api.DataAccess.Entities.Device", "Device")
-                        .WithMany("DeviceDetails")
+                        .WithMany()
                         .HasForeignKey("DeviceID")
-                        .HasConstraintName("FK_dbo.DeviceDetail_DeviceID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -250,11 +252,6 @@ namespace SmartAC.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Status");
-                });
-
-            modelBuilder.Entity("SmartAC.Api.DataAccess.Entities.Device", b =>
-                {
-                    b.Navigation("DeviceDetails");
                 });
 #pragma warning restore 612, 618
         }

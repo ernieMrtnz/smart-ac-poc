@@ -1,0 +1,32 @@
+<app-page-header>Device Details</app-page-header>
+
+<app-page-previous></app-page-previous>
+
+<h2
+  *ngIf="query.deviceDetailsForChart$ | async as deviceDetail"
+  style="margin: 10px"
+>
+  <b>Serial Number: </b>{{ deviceDetail.serialNumber }}
+</h2>
+
+<div class="table-wrapper table-mobile table-hover mat-elevation-z8">
+  <app-device-detail-filter
+    [searchParams]="searchParams"
+    [loading]="query.dataLoading$ | async"
+    (search)="search()"
+  ></app-device-detail-filter>
+
+  <app-loading-bar [isLoading]="query.dataLoading$ | async"></app-loading-bar>
+
+  <app-no-data-found [ngShow]="query.noEntitiesFound$ | async">
+  </app-no-data-found>
+
+  <div
+    *ngIf="query.deviceDetailsForChart$ | async as chartDetails"
+    [ngShow]="chartDetails"
+  >
+    <app-device-detail-bar-chart
+      [deviceDetailsForChart]="chartDetails"
+    ></app-device-detail-bar-chart>
+  </div>
+</div>

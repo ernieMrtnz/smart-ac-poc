@@ -12,8 +12,6 @@
 
         public string Token { get; set; }
 
-        public int Attemptsleft { get; set; }
-
         public bool IsLocked { get; set; }
 
         public string ErrorMessage { get; set; }

@@ -1,0 +1,17 @@
+
+.chart-full-width {
+    margin-top: 25px; 
+    display: flex; 
+    min-height: 400px;
+  }
+  
+  .ngx-charts {
+    g[ngx-charts-y-axis-ticks] text,
+    g[ngx-charts-x-axis-ticks] text {
+      font-size: 14px !important;
+    }
+  
+    g.line-series > path {
+      stroke-width: 3px !important;
+    }
+  } 

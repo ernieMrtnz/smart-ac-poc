@@ -1,5 +1,10 @@
 import { Injectable, NgZone } from "@angular/core";
-import { MatSnackBar, MatSnackBarConfig } from "@angular/material/snack-bar";
+import {
+  MatSnackBar,
+  MatSnackBarConfig,
+  MatSnackBarRef,
+  TextOnlySnackBar,
+} from "@angular/material/snack-bar";
 import { BehaviorSubject } from "rxjs";
 
 import { ApiException } from "@app/core/data-services";
@@ -11,7 +16,7 @@ export class NotificationService {
   constructor(private readonly snackBar: MatSnackBar, private readonly zone: NgZone) {}
 
   updatedEntity$ = new BehaviorSubject<string | number>(null);
-  configTimeout = 8000;
+  configTimeout = 15000;
 
   info(message: string): void {
     this.show(message, {
@@ -25,10 +30,24 @@ export class NotificationService {
     });
   }
 
-  warn(message: string): void {
-    this.show(message, {
-      panelClass: "warning-notification-overlay",
-    });
+  warn(message: string, action: string = null): void {
+    this.show(
+      message,
+      {
+        panelClass: "warning-notification-overlay",
+      },
+      action
+    );
+  }
+
+  warnForAlert(message: string, action: string = null): MatSnackBarRef<TextOnlySnackBar> {
+    return this.snackBar.open(
+      message,
+      action,
+      this.getConfig({
+        panelClass: "warning-notification-overlay",
+      })
+    );
   }
 
   error(message: string): void {
@@ -59,7 +78,11 @@ export class NotificationService {
     this.error(errorMessage);
   }
 
-  private show(message: string, configuration: MatSnackBarConfig): void {
+  private show(message: string, configuration: MatSnackBarConfig, action: string = null): void {
+    this.zone.run(() => this.snackBar.open(message, action, this.getConfig(configuration)));
+  }
+
+  private getConfig(configuration: MatSnackBarConfig): MatSnackBarConfig {
     let config = {
       duration: this.configTimeout,
       verticalPosition: "top",
@@ -67,6 +90,6 @@ export class NotificationService {
       ...configuration,
     } as MatSnackBarConfig;
 
-    this.zone.run(() => this.snackBar.open(message, null, config));
+    return config;
   }
 }

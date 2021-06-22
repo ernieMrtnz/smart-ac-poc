@@ -1,0 +1,34 @@
+<app-page-header>Search Employees</app-page-header>
+
+<app-page-previous></app-page-previous>
+
+<div class="table-wrapper table-mobile table-hover mat-elevation-z8">
+  <app-user-list-filter
+    [searchParams]="searchParams"
+    [loading]="query.dataLoading$ | async"
+    (search)="search(null)"
+  ></app-user-list-filter>
+
+  <app-loading-bar [isLoading]="query.dataLoading$ | async"></app-loading-bar>
+
+  <app-no-data-found [ngShow]="query.noEntitiesFound$ | async">
+  </app-no-data-found>
+
+  <div
+    *ngIf="query.paginationResponse$ | async as pageData"
+    [ngShow]="pageData.data?.length > 0"
+  >
+    <app-user-list-table
+      [list]="pageData.data"
+      (selectEmployee)="goToDetails($event)"
+    ></app-user-list-table>
+
+    <app-paginator
+      [totalCount]="pageData.total"
+      [currentPage]="pageData.currentPage"
+      [pageSize]="pageData.perPage"
+      (pageChange)="search($event)"
+    >
+    </app-paginator>
+  </div>
+</div>

@@ -23,6 +23,8 @@ namespace SmartAC.Api.DataAccess.Entities
 
         public DateTime CreatedDateTime { get; set; }
 
+        public DateTime? ResolvedDate { get; set; }
+
         public virtual Device Device { get; set; }
     }
 }

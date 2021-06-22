@@ -8,6 +8,7 @@ import { MatDialogModule } from "@angular/material/dialog";
 import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatMenuModule } from "@angular/material/menu";
+import { MatListModule } from "@angular/material/list";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatRadioModule } from "@angular/material/radio";
@@ -29,6 +30,11 @@ import { LoadingButtonModule } from "./loading-button/loading-button.module";
 import { LoadingOverlayModule } from "./loading-overlay/loading-overlay.module";
 import { AppInputErrorModule } from "./input-error/input-error.module";
 import { NoDataFoundModule } from "./no-data-found/no-data-found.module";
+import { PageHeaderModule } from "./page-header/page-header.module";
+import { PagePreviousModule } from "./page-previous/page-previous.module";
+import { PaginatorModule } from "./paginator/paginator.module";
+import { PipesModule } from "./pipes";
+import { AppChartModule } from "./charts/chart.module";
 
 export * from "./helpers";
 
@@ -44,6 +50,7 @@ let modules = [
   MatDialogModule,
   MatIconModule,
   MatInputModule,
+  MatListModule,
   MatMenuModule,
   MatProgressBarModule,
   MatProgressSpinnerModule,
@@ -67,6 +74,11 @@ let modules = [
   LoadingOverlayModule,
   AppInputErrorModule,
   NoDataFoundModule,
+  PageHeaderModule,
+  PagePreviousModule,
+  PaginatorModule,
+  PipesModule,
+  AppChartModule,
 ];
 
 @NgModule({

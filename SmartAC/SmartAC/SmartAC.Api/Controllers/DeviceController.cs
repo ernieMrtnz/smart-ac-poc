@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using AutoMapper;
 using Microsoft.Extensions.Logging;
 using SmartAC.Api.Business.Models;
 using SmartAC.Api.Business.Services;
+using SmartAC.Api.Common.Models;
+using SmartAC.Api.Helpers;
 
 namespace SmartAC.Api.Controllers
 {
-    [Route("api/")]
+    [Authorize]
     [ApiController]
     public class DeviceController : ControllerBase
     {
@@ -24,9 +24,13 @@ namespace SmartAC.Api.Controllers
             _deviceService = deviceService;
         }
 
-        [HttpPost]
-        [Route("device")]
-        public async Task<DeviceModel> AddNewDevice(NewDeviceRequest request)
+        /// <summary>
+        /// Adds a new device
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("api/device")]
+        public async Task<DeviceResponseModel> AddNewDevice(NewDeviceRequest request)
         {
             try
             {
@@ -38,28 +42,18 @@ namespace SmartAC.Api.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("device/all")]
-        public async Task<List<DeviceModel>> GetAll()
+        /// <summary>
+        /// Finds devices by params
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpGet("api/devices")]
+        public async Task<PageResult<DeviceResponseModel>> FindByParams(
+            [FromQuery] DeviceSearchRequest request)
         {
             try
             {
-                var result = await _deviceService.GetAll();
-                return result;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        [HttpGet]
-        [Route("device/{serialNumber}")]
-        public async Task<DeviceModel> FindBySerialNumber(string serialNumber)
-        {
-            try
-            {
-                return await _deviceService.FindBySerialNumber(serialNumber);
+                return await _deviceService.FindByParams(request);
             }
             catch (Exception ex)
             {

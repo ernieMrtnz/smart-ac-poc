@@ -1,0 +1,88 @@
+<div class="site-wrapper">
+  <mat-sidenav-container>
+    <mat-sidenav #sidenav mode="push">
+      <mat-nav-list>
+        <span *ngFor="let item of navigation">
+          <a
+            mat-list-item
+            [routerLink]="[route.link]"
+            *ngFor="let route of item.routes"
+            (click)="sidenav.close()"
+          >
+          </a>
+        </span>
+      </mat-nav-list>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <div class="toolbar">
+        <mat-toolbar color="primary">
+          <div
+            class="container"
+            style="display: flex; flex-direction: row; align-items: center"
+          >
+            <button
+              class="d-lg-none"
+              mat-icon-button
+              (click)="sidenav.toggle()"
+              *ngIf="isAuthenticated$ | async"
+            >
+              <mat-icon>menu</mat-icon>
+            </button>
+
+            <span routerLink="dashboard" class="branding">
+              <p>Smart AC</p>
+            </span>
+
+            <span class="toolbar-nav-button" *ngFor="let item of navigation">
+              <span *ngIf="item.routes.length == 1">
+                <a
+                  mat-button
+                  [routerLink]="[item.routes[0].link]"
+                  routerLinkActive="active"
+                >
+                  {{ item.routes[0].label }}
+                </a>
+              </span>
+
+              <span *ngIf="item.routes.length > 1">
+                <button mat-button [matMenuTriggerFor]="dispatchMenu">
+                  <span>{{ item.title }}</span>
+                  <mat-icon style="margin: 0 0 0 4px">arrow_drop_down</mat-icon>
+                </button>
+                <mat-menu #dispatchMenu="matMenu">
+                  <a
+                    *ngFor="let route of item.routes"
+                    mat-menu-item
+                    [routerLink]="[route.link]"
+                    routerLinkActive="active"
+                  >
+                    {{ route.label }}
+                  </a>
+                </mat-menu>
+              </span>
+            </span>
+
+            <span class="toolbar-right-button" *ngIf="isAuthenticated$ | async">
+              <button mat-stroked-button (click)="onLogoutClick()">
+                <mat-icon>power_settings_new</mat-icon>
+                <span>&nbsp; Logout</span>
+              </button>
+            </span>
+          </div>
+        </mat-toolbar>
+      </div>
+
+      <div class="content" [class.content-full]="fullScreenPage$ | async">
+        <div class="container">
+          <mat-spinner
+            *ngIf="isStateLoading$ | async"
+            style="margin: 0 auto"
+          ></mat-spinner>
+          <ng-content></ng-content>
+        </div>
+      </div>
+      <div class="footer"></div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

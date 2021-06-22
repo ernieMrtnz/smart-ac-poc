@@ -11,7 +11,6 @@ html, body {
     }
 }
 
-
 .visibility-hidden {
     visibility: hidden;
 }
@@ -46,6 +45,11 @@ html, body {
 .warning-notification-overlay {
   background-color: $app-warn-color;
   color: $white;
+
+  .mat-simple-snackbar-action {
+    background-color: $app-mat-primary-color;
+    color: $white;
+  }
 }
 
 .error-notification-overlay {

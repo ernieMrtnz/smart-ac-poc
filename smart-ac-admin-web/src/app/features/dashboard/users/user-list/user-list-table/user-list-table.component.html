@@ -1,0 +1,70 @@
+<mat-table [dataSource]="list" [trackBy]="trackByID">
+  <ng-container matColumnDef="id">
+    <mat-header-cell *matHeaderCellDef> ID </mat-header-cell>
+    <mat-cell *matCellDef="let row" mobile-label="ID">
+      <div>
+        <div>{{ row.id }}</div>
+      </div>
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="lastName">
+    <mat-header-cell *matHeaderCellDef> Last Name </mat-header-cell>
+    <mat-cell *matCellDef="let row" mobile-label="Last Name">
+      <div>
+        <div>{{ row.lastName }}</div>
+      </div>
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="firstName">
+    <mat-header-cell *matHeaderCellDef> First Name </mat-header-cell>
+    <mat-cell *matCellDef="let row" mobile-label="First Name">
+      {{ row.firstName }}
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="email">
+    <mat-header-cell *matHeaderCellDef>Email</mat-header-cell>
+    <mat-cell *matCellDef="let row" mobile-label="Email">
+      {{ row.email }}
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="isAdmin">
+    <mat-header-cell *matHeaderCellDef>Is Admin</mat-header-cell>
+    <mat-cell *matCellDef="let row" mobile-label="Is Admin">
+      {{ row.isAdmin ? "Yes" : "No" }}
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="status">
+    <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+    <mat-cell *matCellDef="let row" mobile-label="Status">
+      {{
+        row.statusID === 1
+          ? "Active"
+          : row.statusID === 2
+          ? "Locked"
+          : "Deleted"
+      }}
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="selectEmployee">
+    <mat-header-cell *matHeaderCellDef></mat-header-cell>
+    <mat-cell *matCellDef="let row" mobile-label="">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="selectEmployee.emit(row)"
+      >
+        Employee Details
+      </button>
+    </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns; let i = index">
+  </mat-row>
+</mat-table>

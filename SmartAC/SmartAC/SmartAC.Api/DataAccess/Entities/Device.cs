@@ -8,11 +8,6 @@ namespace SmartAC.Api.DataAccess.Entities
 
     public class Device
     {
-        public Device()
-        {
-            DeviceDetails = new HashSet<DeviceDetail>();
-        }
-
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long ID { get; set; }
@@ -26,7 +21,5 @@ namespace SmartAC.Api.DataAccess.Entities
         public long StatusID { get; set; }
 
         public virtual Status Status { get; set; }
-
-        public virtual ICollection<DeviceDetail> DeviceDetails { get; set; }
     }
 }

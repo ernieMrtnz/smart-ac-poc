@@ -1,0 +1,68 @@
+
+.form-full-container {
+    mat-form-field {
+      width: 100%;
+    }
+  }
+  
+  .form-field-static {
+    padding-bottom: 1.25em;
+  }
+  
+  .form-button-down {
+    padding-top: 0.65em;
+  }
+  
+    
+  .nolabel-form-control {
+      display: block;
+      width: 100%;
+      padding: .25rem .5rem;
+      font-size: .875rem;
+      line-height: 1.5;
+      border-radius: .2rem;
+      color: currentColor;
+      background-color: #fff;
+      background-clip: padding-box;
+      border: 1px solid $app-mat-primary-color;
+      transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+      margin: 0px 0.1rem;
+    
+      &:focus {
+        color: currentColor;
+        background-color: #fff;
+        border-color: $app-mat-primary-color;
+        outline: 0;
+        box-shadow: 0 0 0 0.1rem $app-mat-primary-color;
+      }
+    
+      &.ng-invalid {
+        border-color: $red !important;
+        box-shadow: unset;
+      }
+    }
+  
+    
+  .inline-form {
+      max-width: 100%;
+      min-height: 60px;
+      display: block;
+      background: white;
+      border-radius: 4px;
+    }
+    
+    .inline-form-item {
+      padding: 5px 10px;
+      border: solid 1px #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+      background: white;
+    
+      .row {
+        align-items: center;
+      }
+    
+      .mat-form-field-appearance-legacy .mat-form-field-wrapper {
+        margin-bottom: -0.5em;
+      }
+    }
