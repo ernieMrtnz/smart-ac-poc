@@ -84,7 +84,7 @@ Devices API can be found at [https://smartacapppoc.azurewebsites.net](https://sm
 Swagger Docs can be found at: [https://smartacapppoc.azurewebsites.net/swagger/index.html](https://smartacapppoc.azurewebsites.net "Swagger Docs")
 
 #### Admin Web App ####
-Admin Web App can be found at: [https://smartac-admin-web.azurewebsites.net](hhttps://smartac-admin-web.azurewebsites.net "Admin Web App")
+Admin Web App can be found at: [https://smartac-admin-web.azurewebsites.net](https://smartac-admin-web.azurewebsites.net "Admin Web App")
 
 ##### Credentials for Web App #####
 ```
