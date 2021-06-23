@@ -77,19 +77,14 @@ Documentation for the Smart AC Devices API
 
 ### Endpoints for the apps: ###
 #### Devices API - Base URL #####
-```
-https://smartacapppoc.azurewebsites.net
-```
+Devices API can be found at [https://smartacapppoc.azurewebsites.net](https://smartacapppoc.azurewebsites.net "Devices API")
+
 
 #### Devices API - Swagger ####
-```
-https://smartacapppoc.azurewebsites.net/swagger/index.html
-```
+Swagger Docs can be found at: [https://smartacapppoc.azurewebsites.net/swagger/index.html](https://smartacapppoc.azurewebsites.net "Swagger Docs")
 
 #### Admin Web App ####
-```
-https://smartac-admin-web.azurewebsites.net
-```
+Admin Web App can be found at: [https://smartac-admin-web.azurewebsites.net](hhttps://smartac-admin-web.azurewebsites.net "Admin Web App")
 
 ##### Credentials for Web App #####
 ```
