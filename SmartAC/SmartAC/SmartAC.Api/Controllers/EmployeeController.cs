@@ -80,27 +80,6 @@ namespace SmartAC.Api.Controllers
         }
 
         /// <summary>
-        /// Checks if an user's account is active
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpGet("{id}/isEnabled")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<bool>> IsUserEnabled(long id)
-        {
-            try
-            {
-                var result = await _employeeService.IsUserEnabled(id);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Could not find if user account is enabled");
-            }
-        }
-
-        /// <summary>
         /// Enables an user's account
         /// </summary>
         /// <param name="id"></param>

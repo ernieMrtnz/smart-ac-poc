@@ -60,22 +60,6 @@ namespace SmartAC.Api.Business.Services
             return _mapper.Map<EmployeeResponseModel>(result);
         }
 
-        public async Task<bool> IsUserEnabled(long employeeId)
-        {
-            var employee = await _employeeRepository.FirstOrDefaultAsync(x => x.ID == employeeId);
-            if (employee == null)
-            {
-                throw new Exception("Could not find user.");
-            }
-
-            if (employee.User == null)
-            {
-                throw new Exception("Could not find user");
-            }
-
-            return employee.User.StatusID == (long) UserStatusEnum.Active;
-        }
-
         public async Task<EmployeeResponseModel> EnableUser(long employeeId)
         {
             return await UpdateEmployee(employeeId, (long) UserStatusEnum.Active);
