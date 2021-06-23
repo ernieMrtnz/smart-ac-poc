@@ -2,7 +2,12 @@
 
 <app-page-previous></app-page-previous>
 
-<div class="device-details-to-resolve">
+<app-loading-bar [isLoading]="query.dataLoading$ | async"></app-loading-bar>
+
+<div
+  class="device-details-to-resolve"
+  *ngIf="query.currentDeviceDetails$ | async as deviceDetails"
+>
   <mat-card>
     <div class="container">
       <div class="device-detail">
@@ -11,12 +16,12 @@
 
       <div class="device-detail">
         <b>Air Humidity Percent: </b>
-        {{ deviceDetails?.airHumidityPercent || "" }}
+        {{ deviceDetails?.airHumidityPercent || "" }}%
       </div>
 
       <div class="device-detail">
         <b>Carbon Monoxide Level: </b>
-        {{ deviceDetails?.carbonMonoxideLevel || "" }}%
+        {{ deviceDetails?.carbonMonoxideLevel || "" }} PPM
       </div>
 
       <div class="device-detail">
@@ -25,14 +30,14 @@
       </div>
 
       <div class="device-detail-resolve">
-        <button
-          mat-raised-button
+        <app-loading-button
           color="primary"
-          (click)="resolve()"
-          [disabled]="resolved"
+          (buttonClick)="resolve()"
+          [disabled]="deviceDetails?.resolvedDate"
+          [isLoading]="loading"
         >
-          Resolve Device Issue
-        </button>
+          Resolve Issue
+        </app-loading-button>
       </div>
     </div>
   </mat-card>

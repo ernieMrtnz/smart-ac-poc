@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using SmartAC.Api.Business.Models;
 using SmartAC.Api.Business.Services;
+using SmartAC.Api.Helpers;
 
 namespace SmartAC.Api.Controllers
 {
+    [Route("api/auth")]
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
@@ -26,23 +29,37 @@ namespace SmartAC.Api.Controllers
         /// </summary>
         /// <param name="credentials"></param>
         /// <returns></returns>
-        [HttpPost("api/auth/login")]
-        public async Task<AuthLoginResponseModel> Login(AuthCredentialModel credentials)
+        [HttpPost("login")]
+        [ServiceFilter(typeof(ModelValidationAttribute), Order = 1)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<AuthLoginResponseModel>> Login(AuthCredentialModel credentials)
         {
             try
             {
+                if (credentials == null)
+                {
+                    return BadRequest("Could not find that user.");
+                }
+
                 var result = await _authService.LoginUserAsync(credentials);
-                return result;
+                if (result == null)
+                {
+                    var failedResponse = new AuthLoginResponseModel
+                    {
+                        IsSuccess = false,
+                        ErrorMessage = "Could not log into the system.",
+                    };
+
+                    return BadRequest(failedResponse);
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                var failedResponse = new AuthLoginResponseModel
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "Could not log into the system."
-                };
-
-                return failedResponse;
+                return StatusCode(500, "Error logging into the system");
             }
         }
 
@@ -50,17 +67,64 @@ namespace SmartAC.Api.Controllers
         /// Checks if user is still valid (token)
         /// </summary>
         /// <returns></returns>
-        [HttpGet("api/auth/identity")]
-        public async Task<UserIdentityModel> GetUserIdentity()
+        [HttpGet("identity")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<UserIdentityModel>> GetUserIdentity()
         {
-            // TODO: In prod would verify token is actually from user
-            return new UserIdentityModel()
+            try
             {
-                ID = 1,
-                Name = "Ernesto",
-                UserTypeID = 1,
-                ExpirationTime = DateTime.Now.AddDays(1),
-            };
+                // TODO: In prod would verify token is actually from user
+                var result = new UserIdentityModel()
+                {
+                    ID = 1,
+                    Name = "Ernesto",
+                    UserTypeID = 1,
+                    ExpirationTime = DateTime.Now.AddDays(1),
+                };
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Unable to get user identity");
+            }
+        }
+
+        /// <summary>
+        /// Registers a new device
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns>Response with token to be used in subsequent call</returns>
+        /// <response code="201">Returns object with token</response>
+        /// <response code="400">If item is null</response>
+        [HttpPost("device")]
+        [ServiceFilter(typeof(ModelValidationAttribute), Order = 1)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<AuthDeviceResponseModel>> RegisterNewDevice(NewDeviceRequest request)
+        {
+            try
+            {
+                if (request == null)
+                {
+                    return BadRequest("Could not register device");
+                }
+
+                var result = await _authService.RegisterNewDevice(request);
+
+                if (result == null)
+                {
+                    return BadRequest("Could not register device");
+                }
+
+                return Created("~api/auth/device", result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Unable to register new device");
+            }
         }
 
         /// <summary>
@@ -68,24 +132,62 @@ namespace SmartAC.Api.Controllers
         /// </summary>
         /// <param name="serialNumber"></param>
         /// <returns></returns>
-        [HttpGet("api/auth/device/{serialNumber}/token")]
-        public async Task<AuthDeviceResponseModel> GetDeviceToken(string serialNumber)
+        [HttpPost("device/token")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<AuthDeviceResponseModel>> GetDeviceToken(string serialNumber)
         {
-            return new AuthDeviceResponseModel();
+            try
+            {
+                var result = await _authService.AuthenticateDeviceBySerialNumber(serialNumber);
+                if (result == null)
+                {
+                    return BadRequest("Could not authenticate device");
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Unable to authenticate device");
+            }
         }
 
         #region Temp endpoint
+
         /// <summary>
         /// Adds a user to the system
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPost("api/auth/employee")]
-        public async Task<bool> CreateEmployee(NewUserRequest request)
+        [HttpPost("employee")]
+        [ServiceFilter(typeof(ModelValidationAttribute), Order = 1)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<bool>> CreateEmployee(NewUserRequest request)
         {
-            return await _authService.CreateNewUser(request);
-        }
+            try
+            {
+                if (request == null)
+                {
+                    return BadRequest("Could not register device");
+                }
 
+                var result = await _authService.CreateNewUser(request);
+                if (!result)
+                {
+                    return BadRequest("Was not able to create user.");
+                }
+
+                return Created("~api/auth/employee", result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Unable to register new employee");
+            }
+        }
         #endregion
     }
 }

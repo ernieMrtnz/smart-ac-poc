@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using SmartAC.Api.Business.Models;
 using SmartAC.Api.Business.Services;
@@ -10,6 +11,7 @@ using SmartAC.Api.Helpers;
 namespace SmartAC.Api.Controllers
 {
     [Authorize]
+    [Route("api/device")]
     [ApiController]
     public class DeviceController : ControllerBase
     {
@@ -25,39 +27,37 @@ namespace SmartAC.Api.Controllers
         }
 
         /// <summary>
-        /// Adds a new device
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPost("api/device")]
-        public async Task<DeviceResponseModel> AddNewDevice(NewDeviceRequest request)
-        {
-            try
-            {
-                return await _deviceService.Add(request);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Could not add device");
-            }
-        }
-
-        /// <summary>
         /// Finds devices by params
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpGet("api/devices")]
-        public async Task<PageResult<DeviceResponseModel>> FindByParams(
+        [HttpGet("findDevices")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<PageResult<DeviceResponseModel>>> FindByParams(
             [FromQuery] DeviceSearchRequest request)
         {
             try
             {
-                return await _deviceService.FindByParams(request);
+                if (request == null)
+                {
+                    return BadRequest("Could not find device");
+                }
+
+                var result = await _deviceService.FindByParams(request);
+
+                if (result == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                throw ex;
+                return StatusCode(500, "Could not find device");
             }
         }
     }

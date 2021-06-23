@@ -6,10 +6,12 @@ using SmartAC.Api.Business.Models;
 using SmartAC.Api.Business.Services;
 using SmartAC.Api.Common.Models;
 using SmartAC.Api.Helpers;
+using Microsoft.AspNetCore.Http;
 
 namespace SmartAC.Api.Controllers
 {
     [Authorize]
+    [Route("api/employee")]
     [ApiController]
     public class EmployeeController : ControllerBase
     {
@@ -28,16 +30,25 @@ namespace SmartAC.Api.Controllers
         /// Get all employees
         /// </summary>
         /// <returns>PagedResult employees</returns>
-        [HttpGet("api/employee/forPaged")]
-        public async Task<PageResult<EmployeeResponseModel>> GetEmployees([FromQuery] EmployeeSearchRequest request)
+        [HttpGet("forPaged")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<PageResult<EmployeeResponseModel>>> GetEmployees([FromQuery] EmployeeSearchRequest request)
         {
             try
             {
-                return await _employeeService.GetEmployeesPaged(request);
+                var result = await _employeeService.GetEmployeesPaged(request);
+                if (result == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                return StatusCode(500, "Could not retrieve users list for paged");
             }
         }
 
@@ -46,16 +57,25 @@ namespace SmartAC.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("api/employee/{id}")]
-        public async Task<EmployeeResponseModel> GetById(long id)
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<EmployeeResponseModel>> GetById(long id)
         {
             try
             {
-                return await _employeeService.GetById(id);
+                var result = await _employeeService.GetById(id);
+                if (result == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                return StatusCode(500, "Could not find user");
             }
         }
 
@@ -64,11 +84,20 @@ namespace SmartAC.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("api/employee/{id}/isEnabled")]
-        public async Task<bool> IsUserEnabled(long id)
+        [HttpGet("{id}/isEnabled")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<bool>> IsUserEnabled(long id)
         {
-            var response = await _employeeService.IsUserEnabled(id);
-            return response;
+            try
+            {
+                var result = await _employeeService.IsUserEnabled(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Could not find if user account is enabled");
+            }
         }
 
         /// <summary>
@@ -76,11 +105,27 @@ namespace SmartAC.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpPost]
-        [Route("api/employee/{id}/enable")]
-        public async Task<EmployeeResponseModel> EnableUser(long id)
+        [HttpPut]
+        [Route("{id}/enable")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<EmployeeResponseModel>> EnableUser(long id)
         {
-            return await _employeeService.EnableUser(id);
+            try
+            {
+                var result = await _employeeService.EnableUser(id);
+                if (result == null)
+                {
+                    return BadRequest("Not able to update user account");
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Not able to enable user account");
+            }
         }
 
         /// <summary>
@@ -88,11 +133,27 @@ namespace SmartAC.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpPost]
-        [Route("api/employee/{id}/disable")]
-        public async Task<EmployeeResponseModel> DisableUser(long id)
+        [HttpPut]
+        [Route("{id}/disable")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<EmployeeResponseModel>> DisableUser(long id)
         {
-            return await _employeeService.DisableUser(id);
+            try
+            {
+                var result = await _employeeService.DisableUser(id);
+                if (result == null)
+                {
+                    return BadRequest("Not able to update the user's account");
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

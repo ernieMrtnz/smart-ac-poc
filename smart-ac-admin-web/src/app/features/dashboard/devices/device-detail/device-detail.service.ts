@@ -1,11 +1,6 @@
 import { Injectable } from "@angular/core";
 
-import {
-  DeviceClient,
-  DeviceDetailClient,
-  DeviceDetailsForChartResponse,
-} from "@app/core/data-services";
-import { NotificationService } from "@app/shared";
+import { DeviceDetailClient } from "@app/core/data-services";
 import {
   DeviceDetailsStore,
   SearchDeviceDetailOptionEnum,
@@ -16,9 +11,7 @@ import {
 export class DeviceDetailService {
   constructor(
     private deviceDetailsStore: DeviceDetailsStore,
-    private deviceClient: DeviceClient,
-    private deviceDetailClient: DeviceDetailClient,
-    private notificationService: NotificationService
+    private deviceDetailClient: DeviceDetailClient
   ) {}
 
   setSearchParams(searchParams: SearchDeviceDetailParams): void {

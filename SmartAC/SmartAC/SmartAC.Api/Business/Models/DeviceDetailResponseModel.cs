@@ -19,5 +19,7 @@ namespace SmartAC.Api.Business.Models
         public DateTime CreatedDateTime { get; set; }
 
         public string SerialNumber { get; set; }
+
+        public DateTime? ResolvedDate { get; set; }
     }
 }

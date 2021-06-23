@@ -3,17 +3,17 @@ import { ActivatedRoute } from "@angular/router";
 
 import { DeviceAlertService } from "./device-alert.service";
 import { NotificationService } from "@app/shared";
-import { DeviceDetailResponseModel } from "@app/core/data-services";
+import { DeviceDetailsQuery, DeviceDetailsStore } from "../device-detail/device-detail.state";
 
 @Component({
   templateUrl: "./device-alert.component.html",
 })
 export class DeviceAlertComponent {
-  deviceDetails: DeviceDetailResponseModel;
   deviceDetailId: number;
-  resolved = false;
 
   constructor(
+    public query: DeviceDetailsQuery,
+    private store: DeviceDetailsStore,
     private deviceAlertService: DeviceAlertService,
     private route: ActivatedRoute,
     private notificationService: NotificationService
@@ -24,26 +24,28 @@ export class DeviceAlertComponent {
   }
 
   async resolve(): Promise<void> {
-    let result = await this.deviceAlertService.updateDetails(this.deviceDetailId);
+    this.store.setLoading(true);
 
-    if (result) {
-      this.resolved = result;
-    } else {
-      // issue happened trying to save
-      this.notificationService.error(
-        "Sorry, an issue has occurred trying to update device detail."
-      );
+    try {
+      await this.deviceAlertService.updateDetails(this.deviceDetailId);
+    } catch (error) {
+      this.notificationService.error(error);
+    } finally {
+      this.store.setLoading(false);
     }
   }
 
   private async loadNotificationForDevice(): Promise<void> {
     this.deviceDetailId = this.route.snapshot.paramMap.get("detailsId") as unknown as number;
 
+    this.store.setLoading(true);
+
     try {
-      this.deviceDetails = await this.deviceAlertService.getDetails(this.deviceDetailId);
-      this.resolved = this.deviceDetails.healthStatus === "ok";
+      await this.deviceAlertService.getDetails(this.deviceDetailId);
     } catch (error) {
       this.notificationService.exception(error);
+    } finally {
+      this.store.setLoading(false);
     }
   }
 }

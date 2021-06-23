@@ -11,7 +11,5 @@ namespace SmartAC.Api.Business.Models
         public string Name { get; set; }
 
         public DateTime ExpirationTime { get; set; }
-
-        public long? DeviceID { get; set; }
     }
 }

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
 using SmartAC.Api.Business.Services;
+using SmartAC.Api.Business.Models;
 
 namespace SmartAC.Api.Helpers
 {
@@ -21,19 +22,19 @@ namespace SmartAC.Api.Helpers
             _appSettings = appSettings.Value;
         }
 
-        public async Task Invoke(HttpContext context, UserService userService)
+        public async Task Invoke(HttpContext context, UserService userService, DeviceService deviceService)
         {
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
             if (token != null)
             {
-                await AttachUserToContext(context, userService, token);
+                await AttachUserToContext(context, userService, token, deviceService);
             }
 
             await _next(context);
         }
 
-        private async Task AttachUserToContext(HttpContext context, UserService userService, string token)
+        private async Task AttachUserToContext(HttpContext context, UserService userService, string token, DeviceService deviceService)
         {
             try
             {
@@ -49,10 +50,31 @@ namespace SmartAC.Api.Helpers
                 }, out SecurityToken validatedToken);
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
-                var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+                var deviceIdClaim = jwtToken.Claims.FirstOrDefault(x => x.Type == "deviceId");
+                if (deviceIdClaim != null)
+                {
+                    var deviceId = int.Parse(deviceIdClaim.Value);
+                    var result = await deviceService.GetById(deviceId);
+                    var device = new DeviceIdentityModel
+                    {
+                        ID = result.ID,
+                    };
 
-                // attach user to context on successful jwt validation
-                context.Items["User"] = await userService.GetById(userId);
+                    context.Items["Device"] = device;
+                }
+
+                var userIdClaim = jwtToken.Claims.FirstOrDefault(x => x.Type == "userId");
+                if (userIdClaim != null)
+                {
+                    var userId = int.Parse(userIdClaim.Value);
+                    var result = await userService.GetById(userId);
+                    var user = new UserIdentityModel
+                    {
+                        ID = result.ID,
+                    };
+
+                    context.Items["User"] = user;
+                }
             }
             catch
             {

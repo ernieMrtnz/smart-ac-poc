@@ -5,8 +5,6 @@ namespace SmartAC.Api.Hubs.DeviceStatus
 {
     public interface IDeviceStatusHub
     {
-        Task HighCarbonMonoxideMessage(DeviceStatusResponseModel deviceStatus);
-
-        Task HealthStatusMessage(DeviceStatusResponseModel deviceStatus);
+        Task NotificationErrorMessage(DeviceStatusResponseModel deviceStatus);
     }
 }

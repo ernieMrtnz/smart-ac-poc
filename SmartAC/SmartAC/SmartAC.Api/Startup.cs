@@ -45,6 +45,8 @@ namespace SmartAC.Api
             services.AddScoped<IDeviceRepository, DeviceRepository>();
             services.AddScoped<IDeviceDetailRepository, DeviceDetailRepository>();
 
+            services.AddScoped<ModelValidationAttribute>();
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddControllers().AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));

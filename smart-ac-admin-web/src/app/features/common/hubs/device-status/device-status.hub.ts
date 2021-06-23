@@ -12,6 +12,7 @@ import { AuthService } from "@app/core/auth";
 import { DeviceStatusResponseModel } from "@app/core/data-services";
 import { NotificationService } from "@app/shared";
 import { environment } from "@env";
+import { navigateByUrlWithReload } from "@app/core/helpers";
 
 @Injectable({
   providedIn: "root",
@@ -44,14 +45,8 @@ export class DeviceStatusHub {
         .configureLogging(LogLevel.Debug)
         .build();
 
-      connection.on("HealthStatusMessage", (statusResponseModel: DeviceStatusResponseModel) => {
-        if (statusResponseModel) {
-          this.displayNotificationAlert(statusResponseModel);
-        }
-      });
-
       connection.on(
-        "HighCarbonMonoxideMessage",
+        "NotificationErrorMessage",
         (statusResponseModel: DeviceStatusResponseModel) => {
           if (statusResponseModel) {
             this.displayNotificationAlert(statusResponseModel);
@@ -88,9 +83,8 @@ export class DeviceStatusHub {
       .afterDismissed()
       .subscribe(async (snackDismiss: MatSnackBarDismiss) => {
         if (snackDismiss.dismissedByAction) {
-          await this.router.navigateByUrl(
-            `devices/${statusResponse.deviceID}/details/${statusResponse.deviceDetailID}`
-          );
+          let url = `devices/${statusResponse.deviceID}/details/${statusResponse.deviceDetailID}`;
+          await navigateByUrlWithReload(this.router, url);
         }
       });
   }

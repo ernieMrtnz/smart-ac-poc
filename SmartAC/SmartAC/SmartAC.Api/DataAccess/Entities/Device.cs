@@ -20,6 +20,8 @@ namespace SmartAC.Api.DataAccess.Entities
 
         public long StatusID { get; set; }
 
+        public string DeviceHash { get; set; }
+
         public virtual Status Status { get; set; }
     }
 }

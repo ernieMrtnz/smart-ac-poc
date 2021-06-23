@@ -56,7 +56,7 @@ namespace SmartAC.Api.Business.Services
                 throw new Exception("Incorrect credentials");
             }
 
-            var token = GenerateToken(employee.User);
+            var token = GenerateToken("userId", employee.User.ID.ToString());
 
             var result = new AuthLoginResponseModel()
             {
@@ -99,14 +99,49 @@ namespace SmartAC.Api.Business.Services
             return savedUser != null && savedEmployee != null;
         }
 
-        private string GenerateToken(User user)
+        public async Task<AuthDeviceResponseModel> RegisterNewDevice(NewDeviceRequest request)
+        {
+            var random = new Random();
+            var deviceHash = request.SerialNumber + request.Secret + random.Next(1000);
+            var device = new Device
+            {
+                SerialNumber = request.SerialNumber,
+                FirmwareVersion = request.FirmwareVersion,
+                StatusID = 1,
+                RegistrationDate = DateTime.Now,
+                DeviceHash = deviceHash, // TODO: Save to another table would be better
+            };
+
+            var result = await _deviceRepository.Add(device);
+
+            return await AuthenticateDevice(result.ID.ToString());
+        }
+
+        public async Task<AuthDeviceResponseModel> AuthenticateDeviceBySerialNumber(string serialNumber)
+        {
+            var device = await _deviceRepository.FirstOrDefaultAsync(x => x.SerialNumber == serialNumber);
+            return await AuthenticateDevice(device.ID.ToString());
+        }
+
+        private async Task<AuthDeviceResponseModel> AuthenticateDevice(string deviceId)
+        {
+            var token = GenerateToken("deviceId", deviceId);
+
+            return new AuthDeviceResponseModel
+            {
+                Token = token,
+                IsSuccess = true,
+            };
+        }
+
+        private string GenerateToken(string type, string id)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor()
             {
-                Subject = new ClaimsIdentity(new [] { new Claim("id", user.ID.ToString()), }),
-                Expires = DateTime.Now.AddDays(2),
+                Subject = new ClaimsIdentity(new [] { new Claim(type, id), }),
+                Expires = DateTime.Now.AddDays(20),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             };
 

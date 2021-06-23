@@ -70,6 +70,16 @@ export class LayoutComponent implements OnInit {
         title: "",
         routes: [
           {
+            link: "dashboard",
+            label: "Dashboard",
+            visible: true,
+          },
+        ],
+      },
+      {
+        title: "",
+        routes: [
+          {
             link: "users",
             label: "User Management",
             visible: true,

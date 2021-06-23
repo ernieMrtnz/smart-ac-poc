@@ -15,6 +15,7 @@ namespace SmartAC.Api.Business.DI
             CreateMap<Device, DeviceResponseModel>();
             CreateMap<DeviceDetail, DeviceDetailResponseModel>();
             CreateMap<User, UserIdentityModel>();
+            CreateMap<Device, DeviceIdentityModel>();
             CreateMap<Employee, EmployeeResponseModel>()
                 .ForMember(
                     dst => dst.IsAdmin,

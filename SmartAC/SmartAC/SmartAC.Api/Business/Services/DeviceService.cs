@@ -28,6 +28,11 @@ namespace SmartAC.Api.Business.Services
             _deviceDetailRepository = deviceDetailRepository;
         }
 
+        public async Task<Device> GetById(long id)
+        {
+            return await _deviceRepository.FindAsync(id);
+        }
+
         public async Task<PageResult<DeviceResponseModel>> FindByParams(
             DeviceSearchRequest request)
         {
@@ -51,44 +56,29 @@ namespace SmartAC.Api.Business.Services
             return _mapper.Map<PageResult<DeviceResponseModel>>(result);
         }
 
-        public async Task<DeviceResponseModel> Add(NewDeviceRequest request)
-        {
-            var device = new Device()
-            {
-                SerialNumber = request.SerialNumber,
-                FirmwareVersion = request.FirmwareVersion,
-                StatusID = 1,
-                RegistrationDate = DateTime.Now,
-            };
+        //public async Task<PageResult<DeviceDetailResponseModel>> GetDeviceDetailsByDeviceId(
+        //    long deviceId, 
+        //    OrderByEnum orderBy,
+        //    string sortBy,
+        //    int page,
+        //    int pageSize)
+        //{
+        //    Expression<Func<DeviceDetail, bool>> filter = x => x.DeviceID == deviceId;
 
-            var result = await _deviceRepository.Add(device);
+        //    Expression<Func<DeviceDetail, object>> sortBySelector = sortBy?.ToLower() switch
+        //    {
+        //        "createdatetime" => c => c.CreatedDateTime,
+        //        _ => c => c.ID,
+        //    };
 
-            return _mapper.Map<DeviceResponseModel>(result);
-        }
+        //    var result = await _deviceDetailRepository.FindPageResultAsync(
+        //        filter,
+        //        sortBySelector,
+        //        orderBy,
+        //        page,
+        //        pageSize);
 
-        public async Task<PageResult<DeviceDetailResponseModel>> GetDeviceDetailsByDeviceId(
-            long deviceId, 
-            OrderByEnum orderBy,
-            string sortBy,
-            int page,
-            int pageSize)
-        {
-            Expression<Func<DeviceDetail, bool>> filter = x => x.DeviceID == deviceId;
-
-            Expression<Func<DeviceDetail, object>> sortBySelector = sortBy?.ToLower() switch
-            {
-                "createdatetime" => c => c.CreatedDateTime,
-                _ => c => c.ID,
-            };
-
-            var result = await _deviceDetailRepository.FindPageResultAsync(
-                filter,
-                sortBySelector,
-                orderBy,
-                page,
-                pageSize);
-
-            return _mapper.Map<PageResult<DeviceDetailResponseModel>>(result);
-        }
+        //    return _mapper.Map<PageResult<DeviceDetailResponseModel>>(result);
+        //}
     }
 }

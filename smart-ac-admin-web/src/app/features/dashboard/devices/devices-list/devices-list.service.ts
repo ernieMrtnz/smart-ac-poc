@@ -2,7 +2,12 @@ import { Injectable } from "@angular/core";
 
 import { PageResult, DeviceClient, DeviceResponseModel } from "@app/core/data-services";
 import { NotificationService, PaginatorEvent } from "@app/shared";
-import { DeviceListStore, DeviceListState, DeviceSearchParams } from "./devices-list.state";
+import {
+  DeviceListStore,
+  DeviceListState,
+  DeviceSearchParams,
+  DeviceSearchOptionEnum,
+} from "./devices-list.state";
 import { BaseEntityService } from "../../../common/base-abstract/base-entity.service";
 
 @Injectable()
@@ -25,7 +30,7 @@ export class DeviceListService extends BaseEntityService<DeviceListState> {
       this.store.setLoading(true);
 
       let response = (await this.deviceClient
-        .devices(dto.serialNumber, dto.sortBy, dto.orderBy, page, pageSize)
+        .findDevices(dto.serialNumber, dto.sortBy, dto.orderBy, page, pageSize)
         .toPromise()) as PageResult<DeviceResponseModel>;
 
       this.store.setPaginationResponse(response, page, pageSize);
@@ -45,10 +50,13 @@ export class DeviceListService extends BaseEntityService<DeviceListState> {
 
   private getFiltersDto(searchParams: DeviceSearchParams): Record<string, any> {
     let dto = {
-      serialNumber: searchParams.serialNumber,
       sortBy: searchParams.sortBy,
       orderBy: searchParams.orderBy,
     };
+
+    if (searchParams.option === DeviceSearchOptionEnum.SerialNumber) {
+      Object.assign(dto, { serialNumber: searchParams.serialNumber });
+    }
 
     return dto;
   }

@@ -12,7 +12,8 @@ namespace SmartAC.Api.Helpers
         public void OnAuthorization(AuthorizationFilterContext context)
         {
             var user = (UserIdentityModel)context.HttpContext.Items["User"];
-            if (user == null)
+            var device = (DeviceIdentityModel)context.HttpContext.Items["Device"];
+            if (user == null && device == null)
             {
                 context.Result = new JsonResult(new { message = "Unauthorized" })
                 {

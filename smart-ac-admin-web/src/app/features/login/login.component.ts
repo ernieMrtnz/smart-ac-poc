@@ -48,7 +48,7 @@ export class LoginComponent implements OnInit {
         this.notificationService.error(result.errorMessage);
       }
     } catch (error) {
-      this.notificationService.exception(error);
+      this.notificationService.error("Incorrect credentials");
     } finally {
       this.loading$.next(false);
     }

@@ -62,14 +62,10 @@ namespace SmartAC.Api.Business.Services
 
             var deviceStatusResponse = await GetDeviceStatusResponse(deviceDetail);
 
-            if (IsHealtStatusNotOk(request.HealthStatus))
+            if (IsHealtStatusNotOk(request.HealthStatus) ||
+                IsCarbonMonoxideLevelHigh(newDeviceDetail.CarbonMonoxideLevel))
             {
-                await _hubContext.Clients.All.HealthStatusMessage(deviceStatusResponse);
-            }
-
-            if (IsCarbonMonoxideLevelHigh(newDeviceDetail.CarbonMonoxideLevel))
-            {
-                await _hubContext.Clients.All.HighCarbonMonoxideMessage(deviceStatusResponse);
+                await _hubContext.Clients.All.NotificationErrorMessage(deviceStatusResponse);
             }
 
             return result;
@@ -158,7 +154,7 @@ namespace SmartAC.Api.Business.Services
             return result;
         }
 
-        public async Task<bool> ResolveStatus(long id)
+        public async Task<DeviceDetailResponseModel> ResolveStatus(long id)
         {
             var detail = await _deviceDetailRepository.FindAsync(id);
             if (detail == null)
@@ -169,13 +165,18 @@ namespace SmartAC.Api.Business.Services
             detail.HealthStatus = EnumHelper.GetDescription(HealthStatusEnum.Ok);
             detail.ResolvedDate = DateTime.Now;
 
-            await _deviceDetailRepository.Update(detail);
+            var result = await _deviceDetailRepository.Update(detail);
 
-            // TODO: Add specific DTO to send to client
-            await _hubContext.Clients.All.HealthStatusMessage(null);
-            await _hubContext.Clients.All.HighCarbonMonoxideMessage(null);
+            await _hubContext.Clients.All.NotificationErrorMessage(null);
 
-            return true;
+            var response = _mapper.Map<DeviceDetailResponseModel>(result);
+
+            var device = await _deviceRepository.FindAsync(detail.DeviceID);
+            var deviceSerialNum = device.SerialNumber ?? string.Empty;
+
+            response.SerialNumber = deviceSerialNum;
+
+            return response;
         }
 
         private async Task<DeviceStatusResponseModel> GetDeviceStatusResponse(DeviceDetail deviceDetail)

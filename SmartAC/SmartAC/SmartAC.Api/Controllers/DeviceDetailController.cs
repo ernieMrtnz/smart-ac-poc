@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using SmartAC.Api.Business.Models;
 using SmartAC.Api.Business.Services;
@@ -9,6 +10,7 @@ using SmartAC.Api.Helpers;
 namespace SmartAC.Api.Controllers
 {
     [Authorize]
+    [Route("api/deviceDetails")]
     [ApiController]
     public class DeviceDetailController : ControllerBase
     {
@@ -28,16 +30,25 @@ namespace SmartAC.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("api/deviceDetail/{id}")]
-        public async Task<DeviceDetailResponseModel> GetById(long id)
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<DeviceDetailResponseModel>> GetById(long id)
         {
             try
             {
-                return await _deviceDetailService.GetById(id);
+                var result = await _deviceDetailService.GetById(id);
+                if (result == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                return StatusCode(500, "Could not find device details");
             }
         }
 
@@ -46,16 +57,32 @@ namespace SmartAC.Api.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPost("api/deviceDetails")]
-        public async Task<DeviceDetailResponseModel> AddDetails(DeviceDetailRequest request)
+        [HttpPost]
+        [ServiceFilter(typeof(ModelValidationAttribute), Order = 1)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<DeviceDetailResponseModel>> AddDetails(DeviceDetailRequest request)
         {
             try
             {
-                return await _deviceDetailService.Add(request);
+                if (request == null)
+                {
+                    return BadRequest("Request cannot be empty");
+                }
+
+                var result = await _deviceDetailService.Add(request);
+                if (result == null)
+                {
+                    return NotFound();
+                }
+
+                return Created("~api/deviceDetails", result);
             }
             catch (Exception ex)
             {
-                throw new Exception("Could not add details for device");
+                return StatusCode(500, "Could not add device details");
             }
         }
 
@@ -64,16 +91,31 @@ namespace SmartAC.Api.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPost("api/deviceDetails/bulk")]
-        public async Task<bool> AddBulkDetails(BulkDeviceDetailRequest request)
+        [HttpPost("bulk")]
+        [ServiceFilter(typeof(ModelValidationAttribute), Order = 1)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<bool>> AddBulkDetails(BulkDeviceDetailRequest request)
         {
             try
             {
-                return await _deviceDetailService.AddBulk(request);
+                if (request == null)
+                {
+                    return BadRequest("Could not add the list of device details");
+                }
+
+                var result = await _deviceDetailService.AddBulk(request);
+                if (!result)
+                {
+                    return BadRequest("Not able to bulk insert the device details");
+                }
+
+                return Created("~api/deviceDetails/bulk", "Successfully saved the bulk device details");
             }
             catch (Exception ex)
             {
-                throw new Exception("Could not add bulk device details.");
+                return StatusCode(500, "Could not add the list of device details");
             }
         }
 
@@ -83,18 +125,27 @@ namespace SmartAC.Api.Controllers
         /// <param name="deviceId"></param>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpGet("api/deviceDetail/{deviceId}/forChart")]
-        public async Task<DeviceDetailsForChartResponse> FindDetailsDataForChart(
+        [HttpGet("{deviceId}/forChart")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<DeviceDetailsForChartResponse>> FindDetailsDataForChart(
             long deviceId,
             [FromQuery] DeviceDetailsForChartRequest request)
         {
             try
             {
-                return await _deviceDetailService.FindForChart(deviceId, request);
+                var result = await _deviceDetailService.FindForChart(deviceId, request);
+                if (result == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                return StatusCode(500, "Could not find device details for chart");
             }
         }
 
@@ -103,16 +154,25 @@ namespace SmartAC.Api.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpPut("api/deviceDetail/{id}/resolve")]
-        public async Task<bool> ResolveStatus(long id)
+        [HttpPut("{id}/resolve")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<DeviceDetailResponseModel>> ResolveStatus(long id)
         {
             try
             {
-                return await _deviceDetailService.ResolveStatus(id);
+                var result = await _deviceDetailService.ResolveStatus(id);
+                if (result == null)
+                {
+                    return BadRequest("Not able to update device details");
+                }
+
+                return Ok(result);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw new Exception("Could not resolve device issue");
+                return StatusCode(500, "Not able to resolve device details issue");
             }
         }
     }

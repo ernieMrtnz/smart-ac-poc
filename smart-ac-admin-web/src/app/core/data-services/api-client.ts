@@ -73,6 +73,16 @@ export class AuthenticationClient {
             result200 = _responseText === "" ? null : <AuthLoginResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
             return _observableOf(result200);
             }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : <ProblemDetails>JSON.parse(_responseText, this.jsonParseReviver);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
+            }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -123,6 +133,10 @@ export class AuthenticationClient {
             result200 = _responseText === "" ? null : <UserIdentityModel>JSON.parse(_responseText, this.jsonParseReviver);
             return _observableOf(result200);
             }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
+            }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -132,13 +146,78 @@ export class AuthenticationClient {
     }
 
     /**
-     * Authenticates a device
+     * Registers a new device
+     * @return Returns object with token
      */
-    token(serialNumber: string | null): Observable<AuthDeviceResponseModel> {
-        let url_ = this.baseUrl + "/api/auth/device/{serialNumber}/token";
-        if (serialNumber === undefined || serialNumber === null)
-            throw new Error("The parameter 'serialNumber' must be defined.");
-        url_ = url_.replace("{serialNumber}", encodeURIComponent("" + serialNumber));
+    device(request: NewDeviceRequest): Observable<AuthDeviceResponseModel> {
+        let url_ = this.baseUrl + "/api/auth/device";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDevice(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDevice(<any>response_);
+                } catch (e) {
+                    return <Observable<AuthDeviceResponseModel>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<AuthDeviceResponseModel>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processDevice(response: HttpResponseBase): Observable<AuthDeviceResponseModel> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 201) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result201: any = null;
+            result201 = _responseText === "" ? null : <AuthDeviceResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : <ProblemDetails>JSON.parse(_responseText, this.jsonParseReviver);
+            return throwException("If item is null", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<AuthDeviceResponseModel>(<any>null);
+    }
+
+    /**
+     * Authenticates a device
+     * @param serialNumber (optional) 
+     */
+    token(serialNumber?: string | null | undefined): Observable<AuthDeviceResponseModel> {
+        let url_ = this.baseUrl + "/api/auth/device/token?";
+        if (serialNumber !== undefined && serialNumber !== null)
+            url_ += "serialNumber=" + encodeURIComponent("" + serialNumber) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -149,7 +228,7 @@ export class AuthenticationClient {
             })
         };
 
-        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
             return this.processToken(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
@@ -175,6 +254,16 @@ export class AuthenticationClient {
             let result200: any = null;
             result200 = _responseText === "" ? null : <AuthDeviceResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
             return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : <ProblemDetails>JSON.parse(_responseText, this.jsonParseReviver);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -224,11 +313,21 @@ export class AuthenticationClient {
             (<any>response).error instanceof Blob ? (<any>response).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            let result200: any = null;
-            result200 = _responseText === "" ? null : <boolean>JSON.parse(_responseText, this.jsonParseReviver);
-            return _observableOf(result200);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : <boolean>JSON.parse(_responseText, this.jsonParseReviver);
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : <ProblemDetails>JSON.parse(_responseText, this.jsonParseReviver);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -253,60 +352,6 @@ export class DeviceClient {
     }
 
     /**
-     * Adds a new device
-     */
-    device(request: NewDeviceRequest): Observable<DeviceResponseModel> {
-        let url_ = this.baseUrl + "/api/device";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(request);
-
-        let options_ : any = {
-            body: content_,
-            observe: "response",
-            responseType: "blob",
-            headers: new HttpHeaders({
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            })
-        };
-
-        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processDevice(response_);
-        })).pipe(_observableCatch((response_: any) => {
-            if (response_ instanceof HttpResponseBase) {
-                try {
-                    return this.processDevice(<any>response_);
-                } catch (e) {
-                    return <Observable<DeviceResponseModel>><any>_observableThrow(e);
-                }
-            } else
-                return <Observable<DeviceResponseModel>><any>_observableThrow(response_);
-        }));
-    }
-
-    protected processDevice(response: HttpResponseBase): Observable<DeviceResponseModel> {
-        const status = response.status;
-        const responseBlob =
-            response instanceof HttpResponse ? response.body :
-            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
-
-        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
-            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            let result200: any = null;
-            result200 = _responseText === "" ? null : <DeviceResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
-            return _observableOf(result200);
-            }));
-        } else if (status !== 200 && status !== 204) {
-            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            }));
-        }
-        return _observableOf<DeviceResponseModel>(<any>null);
-    }
-
-    /**
      * Finds devices by params
      * @param serialNumber (optional) 
      * @param sortBy (optional) 
@@ -314,8 +359,8 @@ export class DeviceClient {
      * @param page (optional) 
      * @param pageSize (optional) 
      */
-    devices(serialNumber?: string | null | undefined, sortBy?: string | null | undefined, orderBy?: OrderByEnum | undefined, page?: number | undefined, pageSize?: number | undefined): Observable<PageResultOfDeviceResponseModel> {
-        let url_ = this.baseUrl + "/api/devices?";
+    findDevices(serialNumber?: string | null | undefined, sortBy?: string | null | undefined, orderBy?: OrderByEnum | undefined, page?: number | undefined, pageSize?: number | undefined): Observable<PageResultOfDeviceResponseModel> {
+        let url_ = this.baseUrl + "/api/device/findDevices?";
         if (serialNumber !== undefined && serialNumber !== null)
             url_ += "SerialNumber=" + encodeURIComponent("" + serialNumber) + "&";
         if (sortBy !== undefined && sortBy !== null)
@@ -343,11 +388,11 @@ export class DeviceClient {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processDevices(response_);
+            return this.processFindDevices(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processDevices(<any>response_);
+                    return this.processFindDevices(<any>response_);
                 } catch (e) {
                     return <Observable<PageResultOfDeviceResponseModel>><any>_observableThrow(e);
                 }
@@ -356,7 +401,7 @@ export class DeviceClient {
         }));
     }
 
-    protected processDevices(response: HttpResponseBase): Observable<PageResultOfDeviceResponseModel> {
+    protected processFindDevices(response: HttpResponseBase): Observable<PageResultOfDeviceResponseModel> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -368,6 +413,22 @@ export class DeviceClient {
             let result200: any = null;
             result200 = _responseText === "" ? null : <PageResultOfDeviceResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
             return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : <ProblemDetails>JSON.parse(_responseText, this.jsonParseReviver);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result404: any = null;
+            result404 = _responseText === "" ? null : <ProblemDetails>JSON.parse(_responseText, this.jsonParseReviver);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -394,8 +455,8 @@ export class DeviceDetailClient {
     /**
      * Retrieves a device detail, (coming from alerts)
      */
-    deviceDetail(id: number): Observable<DeviceDetailResponseModel> {
-        let url_ = this.baseUrl + "/api/deviceDetail/{id}";
+    deviceDetailsGet(id: number): Observable<DeviceDetailResponseModel> {
+        let url_ = this.baseUrl + "/api/deviceDetails/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -410,11 +471,11 @@ export class DeviceDetailClient {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processDeviceDetail(response_);
+            return this.processDeviceDetailsGet(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processDeviceDetail(<any>response_);
+                    return this.processDeviceDetailsGet(<any>response_);
                 } catch (e) {
                     return <Observable<DeviceDetailResponseModel>><any>_observableThrow(e);
                 }
@@ -423,7 +484,7 @@ export class DeviceDetailClient {
         }));
     }
 
-    protected processDeviceDetail(response: HttpResponseBase): Observable<DeviceDetailResponseModel> {
+    protected processDeviceDetailsGet(response: HttpResponseBase): Observable<DeviceDetailResponseModel> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -436,6 +497,16 @@ export class DeviceDetailClient {
             result200 = _responseText === "" ? null : <DeviceDetailResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
             return _observableOf(result200);
             }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result404: any = null;
+            result404 = _responseText === "" ? null : <ProblemDetails>JSON.parse(_responseText, this.jsonParseReviver);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
+            }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -447,7 +518,7 @@ export class DeviceDetailClient {
     /**
      * Adds a new device details info
      */
-    deviceDetails(request: DeviceDetailRequest): Observable<DeviceDetailResponseModel> {
+    deviceDetailsPost(request: DeviceDetailRequest): Observable<DeviceDetailResponseModel> {
         let url_ = this.baseUrl + "/api/deviceDetails";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -464,11 +535,11 @@ export class DeviceDetailClient {
         };
 
         return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processDeviceDetails(response_);
+            return this.processDeviceDetailsPost(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processDeviceDetails(<any>response_);
+                    return this.processDeviceDetailsPost(<any>response_);
                 } catch (e) {
                     return <Observable<DeviceDetailResponseModel>><any>_observableThrow(e);
                 }
@@ -477,18 +548,34 @@ export class DeviceDetailClient {
         }));
     }
 
-    protected processDeviceDetails(response: HttpResponseBase): Observable<DeviceDetailResponseModel> {
+    protected processDeviceDetailsPost(response: HttpResponseBase): Observable<DeviceDetailResponseModel> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
             (<any>response).error instanceof Blob ? (<any>response).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            let result200: any = null;
-            result200 = _responseText === "" ? null : <DeviceDetailResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
-            return _observableOf(result200);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : <DeviceDetailResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : <ProblemDetails>JSON.parse(_responseText, this.jsonParseReviver);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result404: any = null;
+            result404 = _responseText === "" ? null : <ProblemDetails>JSON.parse(_responseText, this.jsonParseReviver);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -538,11 +625,21 @@ export class DeviceDetailClient {
             (<any>response).error instanceof Blob ? (<any>response).error : undefined;
 
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
+        if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            let result200: any = null;
-            result200 = _responseText === "" ? null : <boolean>JSON.parse(_responseText, this.jsonParseReviver);
-            return _observableOf(result200);
+            let result201: any = null;
+            result201 = _responseText === "" ? null : <boolean>JSON.parse(_responseText, this.jsonParseReviver);
+            return _observableOf(result201);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : <ProblemDetails>JSON.parse(_responseText, this.jsonParseReviver);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -560,7 +657,7 @@ export class DeviceDetailClient {
      * @param isYear (optional) 
      */
     forChart(deviceId: number, isToday?: boolean | undefined, isWeek?: boolean | undefined, isMonth?: boolean | undefined, isYear?: boolean | undefined): Observable<DeviceDetailsForChartResponse> {
-        let url_ = this.baseUrl + "/api/deviceDetail/{deviceId}/forChart?";
+        let url_ = this.baseUrl + "/api/deviceDetails/{deviceId}/forChart?";
         if (deviceId === undefined || deviceId === null)
             throw new Error("The parameter 'deviceId' must be defined.");
         url_ = url_.replace("{deviceId}", encodeURIComponent("" + deviceId));
@@ -617,6 +714,16 @@ export class DeviceDetailClient {
             result200 = _responseText === "" ? null : <DeviceDetailsForChartResponse>JSON.parse(_responseText, this.jsonParseReviver);
             return _observableOf(result200);
             }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result404: any = null;
+            result404 = _responseText === "" ? null : <ProblemDetails>JSON.parse(_responseText, this.jsonParseReviver);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
+            }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -628,8 +735,8 @@ export class DeviceDetailClient {
     /**
      * Updates the resolution for a device detail that was alerted
      */
-    resolve(id: number): Observable<boolean> {
-        let url_ = this.baseUrl + "/api/deviceDetail/{id}/resolve";
+    resolve(id: number): Observable<DeviceDetailResponseModel> {
+        let url_ = this.baseUrl + "/api/deviceDetails/{id}/resolve";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
         url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -650,14 +757,14 @@ export class DeviceDetailClient {
                 try {
                     return this.processResolve(<any>response_);
                 } catch (e) {
-                    return <Observable<boolean>><any>_observableThrow(e);
+                    return <Observable<DeviceDetailResponseModel>><any>_observableThrow(e);
                 }
             } else
-                return <Observable<boolean>><any>_observableThrow(response_);
+                return <Observable<DeviceDetailResponseModel>><any>_observableThrow(response_);
         }));
     }
 
-    protected processResolve(response: HttpResponseBase): Observable<boolean> {
+    protected processResolve(response: HttpResponseBase): Observable<DeviceDetailResponseModel> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -667,15 +774,25 @@ export class DeviceDetailClient {
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result200: any = null;
-            result200 = _responseText === "" ? null : <boolean>JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = _responseText === "" ? null : <DeviceDetailResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
             return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : <ProblemDetails>JSON.parse(_responseText, this.jsonParseReviver);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<boolean>(<any>null);
+        return _observableOf<DeviceDetailResponseModel>(<any>null);
     }
 }
 
@@ -753,6 +870,16 @@ export class EmployeeClient {
             result200 = _responseText === "" ? null : <PageResultOfEmployeeResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
             return _observableOf(result200);
             }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result404: any = null;
+            result404 = _responseText === "" ? null : <ProblemDetails>JSON.parse(_responseText, this.jsonParseReviver);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
+            }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -805,6 +932,16 @@ export class EmployeeClient {
             let result200: any = null;
             result200 = _responseText === "" ? null : <EmployeeResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
             return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result404: any = null;
+            result404 = _responseText === "" ? null : <ProblemDetails>JSON.parse(_responseText, this.jsonParseReviver);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -859,6 +996,10 @@ export class EmployeeClient {
             result200 = _responseText === "" ? null : <boolean>JSON.parse(_responseText, this.jsonParseReviver);
             return _observableOf(result200);
             }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
+            }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -885,7 +1026,7 @@ export class EmployeeClient {
             })
         };
 
-        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
             return this.processEnable(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
@@ -911,6 +1052,16 @@ export class EmployeeClient {
             let result200: any = null;
             result200 = _responseText === "" ? null : <EmployeeResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
             return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : <ProblemDetails>JSON.parse(_responseText, this.jsonParseReviver);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -938,7 +1089,7 @@ export class EmployeeClient {
             })
         };
 
-        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
             return this.processDisable(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
@@ -965,6 +1116,16 @@ export class EmployeeClient {
             result200 = _responseText === "" ? null : <EmployeeResponseModel>JSON.parse(_responseText, this.jsonParseReviver);
             return _observableOf(result200);
             }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : <ProblemDetails>JSON.parse(_responseText, this.jsonParseReviver);
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("A server side error occurred.", status, _responseText, _headers);
+            }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -984,6 +1145,25 @@ export interface AuthLoginResponseModel {
     errorMessage?: string | undefined;
 }
 
+/** A machine-readable format for specifying errors in HTTP API responses based on https://tools.ietf.org/html/rfc7807. */
+export interface ProblemDetails {
+    /** A URI reference [RFC3986] that identifies the problem type. This specification encourages that, when
+dereferenced, it provide human-readable documentation for the problem type
+(e.g., using HTML [W3C.REC-html5-20141028]).  When this member is not present, its value is assumed to be
+"about:blank". */
+    type?: string | undefined;
+    /** A short, human-readable summary of the problem type.It SHOULD NOT change from occurrence to occurrence
+of the problem, except for purposes of localization(e.g., using proactive content negotiation;
+see[RFC7231], Section 3.4). */
+    title?: string | undefined;
+    /** The HTTP status code([RFC7231], Section 6) generated by the origin server for this occurrence of the problem. */
+    status?: number | undefined;
+    /** A human-readable explanation specific to this occurrence of the problem. */
+    detail?: string | undefined;
+    /** A URI reference that identifies the specific occurrence of the problem.It may or may not yield further information if dereferenced. */
+    instance?: string | undefined;
+}
+
 export interface AuthCredentialModel {
     login: string;
     password: string;
@@ -994,12 +1174,17 @@ export interface UserIdentityModel {
     userTypeID: number;
     name?: string | undefined;
     expirationTime: Date;
-    deviceID?: number | undefined;
 }
 
 export interface AuthDeviceResponseModel {
     isSuccess: boolean;
     token?: string | undefined;
+}
+
+export interface NewDeviceRequest {
+    serialNumber: string;
+    secret: string;
+    firmwareVersion?: string | undefined;
 }
 
 export interface NewUserRequest {
@@ -1011,23 +1196,17 @@ export interface NewUserRequest {
     isAdmin: boolean;
 }
 
+export interface PageResultOfDeviceResponseModel {
+    page?: DeviceResponseModel[] | undefined;
+    totalCount: number;
+}
+
 export interface DeviceResponseModel {
     id: number;
     serialNumber?: string | undefined;
     registrationDate: Date;
     firmwareVersion?: string | undefined;
     statusID: number;
-}
-
-export interface NewDeviceRequest {
-    serialNumber?: string | undefined;
-    registrationDate: Date;
-    firmwareVersion?: string | undefined;
-}
-
-export interface PageResultOfDeviceResponseModel {
-    page?: DeviceResponseModel[] | undefined;
-    totalCount: number;
 }
 
 export type OrderByEnum = "Asc" | "Desc";
@@ -1041,6 +1220,7 @@ export interface DeviceDetailResponseModel {
     deviceID: number;
     createdDateTime: Date;
     serialNumber?: string | undefined;
+    resolvedDate?: Date | undefined;
 }
 
 export interface DeviceDetailRequest {
